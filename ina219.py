@@ -130,6 +130,11 @@ class INA219:
         value = self._voltage_register()
         return float(value) * self.__BUS_MILLIVOLTS_LSB / 1000
 
+    def supply_voltage(self):
+        """ Returns the bus supply voltage in volts. This is the sum of
+        the bus voltage and shunt voltage."""
+        return self.voltage() + (float(self.shunt_voltage()) / 1000)
+
     def current(self):
         """ Returns the bus current in milliamps. """
         return self._current_register() * self._current_lsb * 1000

@@ -37,7 +37,8 @@ The address of the sensor in this case is the default of _0x40_.
 
 Note that the bus voltage is that on the load side of the shunt resister, 
 if you want the voltage on the supply side then you should add the bus
-voltage and shunt voltage together.
+voltage and shunt voltage together, or use the *supply_voltage()* 
+function.
 
 ```python
 #!/usr/bin/env python
@@ -124,6 +125,8 @@ The arguments, which are all optional, are:
         * ina.ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
         * ina.ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
 * `voltage()` Returns the bus voltage in volts (V).
+* `supply_voltage()` Returns the bus supply voltage in volts (V). This 
+    is the sum of the bus voltage and shunt voltage.
 * `current()` Returns the bus current in milliamps (mA).
 * `power()` Returns the bus power consumption in milliwatts (mW).
 * `shunt_voltage()` Returns the shunt voltage in millivolts (mV).

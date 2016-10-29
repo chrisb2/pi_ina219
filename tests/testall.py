@@ -121,6 +121,11 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.readList = Mock(return_value=[0x00, 0x08])
         self.assertEqual(self.ina.voltage(), 0.004)
 
+    def test_read_supply_voltage(self):
+        self.ina.voltage = Mock(return_value=2.504)
+        self.ina.shunt_voltage = Mock(return_value=35.000)
+        self.assertEqual(self.ina.supply_voltage(), 2.539)        
+
     def test_read_0v(self):
         self.ina._i2c.readList = Mock(return_value=[0x00, 0x00])
         self.assertEqual(self.ina.voltage(), 0)
