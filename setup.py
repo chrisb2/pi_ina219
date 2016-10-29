@@ -16,7 +16,7 @@ requires = ['Adafruit_GPIO', 'mock']
 if sys.platform != 'win32' and sys.platform != 'darwin':
     requires.append('spidev')
 
-setup(name              = 'pi-ina219',
+setup(name              = 'pi_ina219',
       version           = '1.0.0',
       author            = 'Chris Borrill',
       author_email      = 'chris.borrill@gmail.com',
