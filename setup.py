@@ -12,11 +12,8 @@ import sys
 
 # Define required packages.
 requires = ['Adafruit_GPIO', 'mock']
-# Assume spidev is required on non-windows & non-mac platforms (i.e. linux).
-if sys.platform != 'win32' and sys.platform != 'darwin':
-    requires.append('spidev')
 
-setup(name              = 'pi_ina219',
+setup(name              = 'ina219',
       version           = '1.0.0',
       author            = 'Chris Borrill',
       author_email      = 'chris.borrill@gmail.com',
