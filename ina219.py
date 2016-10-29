@@ -96,23 +96,23 @@ class INA219:
         Arguments:
         voltage_range -- The full scale voltage range, this is either 16V
             or 32V represented by one of the following constants;
-            ina.RANGE_16V, ina.RANGE_32V (default).
+            RANGE_16V, RANGE_32V (default).
         gain -- The gain which controls the maximum range of the shunt
             voltage represented by one of the following constants;
-            ina.GAIN_1_40MV, ina.GAIN_2_80MV, ina.GAIN_4_160MV,
-            ina.GAIN_8_320MV (default).
+            GAIN_1_40MV, GAIN_2_80MV, GAIN_4_160MV,
+            GAIN_8_320MV (default).
         bus_adc -- The bus ADC resolution (9-, 10-, 11-, or 12-bit) or
             set the number of samples used when averaging results
-            represent by one of the following constants; ina.ADC_9BIT,
-            ina.ADC_10BIT, ina.ADC_11BIT, ina.ADC_12BIT (default),
-            ina.ADC_2SAMP, ina.ADC_4SAMP, ina.ADC_8SAMP, ina.ADC_16SAMP,
-            ina.ADC_32SAMP, ina.ADC_64SAMP, ina.ADC_128SAMP
+            represent by one of the following constants; ADC_9BIT,
+            ADC_10BIT, ADC_11BIT, ADC_12BIT (default),
+            ADC_2SAMP, ADC_4SAMP, ADC_8SAMP, ADC_16SAMP,
+            ADC_32SAMP, ADC_64SAMP, ADC_128SAMP
         shunt_adc -- The shunt ADC resolution (9-, 10-, 11-, or 12-bit) or
             set the number of samples used when averaging results
-            represent by one of the following constants; ina.ADC_9BIT,
-            ina.ADC_10BIT, ina.ADC_11BIT, ina.ADC_12BIT (default),
-            ina.ADC_2SAMP, ina.ADC_4SAMP, ina.ADC_8SAMP, ina.ADC_16SAMP,
-            ina.ADC_32SAMP, ina.ADC_64SAMP, ina.ADC_128SAMP
+            represent by one of the following constants; ADC_9BIT,
+            ADC_10BIT, ADC_11BIT, ADC_12BIT (default),
+            ADC_2SAMP, ADC_4SAMP, ADC_8SAMP, ADC_16SAMP,
+            ADC_32SAMP, ADC_64SAMP, ADC_128SAMP
         """
         self.__validate_voltage_range(voltage_range)
         logging.debug(

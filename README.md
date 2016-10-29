@@ -1,6 +1,6 @@
-# Raspberry Pi Library for Voltage and Current Sensors Using the INA219
+# Raspberry Pi Python Library for Voltage and Current Sensors Using the INA219
 
-This library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf) 
+This Python library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf) 
 current and power monitor from Texas Instruments.
 
 The library currently only supports _continuous_ reads of voltage and 
@@ -9,6 +9,9 @@ power, but not _triggered_ reads.
 The low power mode of the INA219 is supported, so if only occasional 
 reads are being made in a battery based system, current consumption can 
 be minimised.
+
+The library has been tested with the 
+[Adafruit INA219 Breakout](https://www.adafruit.com/products/904).
 
 ## Prerequisites
 
@@ -84,41 +87,41 @@ The arguments, are:
 The arguments, which are all optional, are:
     * voltage_range: The full scale voltage range, this is either 16V or 32V, 
     represented by one of the following constants.
-        * ina.RANGE_16V: Range 0-16 volts
-        * ina.RANGE_32V: Range 0-32 volts (**default**)
+        * RANGE_16V: Range 0-16 volts
+        * RANGE_32V: Range 0-32 volts (**default**). **Device only supports upto 26V.**
     * gain: The gain, which controls the maximum range of the shunt voltage, represented by one of the following constants. 
-        * ina.GAIN_1_40MV: Maximum shunt voltage 40mV
-        * ina.GAIN_2_80MV: Maximum shunt voltage 80mV
-        * ina.GAIN_4_160MV: Maximum shunt voltage 160mV
-        * ina.GAIN_8_320MV: Maximum shunt voltage 320mV (**default**)
+        * GAIN_1_40MV: Maximum shunt voltage 40mV
+        * GAIN_2_80MV: Maximum shunt voltage 80mV
+        * GAIN_4_160MV: Maximum shunt voltage 160mV
+        * GAIN_8_320MV: Maximum shunt voltage 320mV (**default**)
     * bus_adc: The bus ADC resolution (9-, 10-, 11-, or 12-bit), or
         set the number of samples used when averaging results, represented by
         one of the following constants.
-        * ina.ADC_9BIT: 9bit, conversion time 84us.
-        * ina.ADC_10BIT: 10bit, conversion time 148us.
-        * ina.ADC_11BIT: 11bit, conversion time 276us.
-        * ina.ADC_12BIT: 12bit conversion time 532us (**default**).
-        * ina.ADC_2SAMP: 2 samples at 12bit, conversion time 1.06ms.
-        * ina.ADC_4SAMP: 4 samples at 12bit, conversion time 2.13ms.
-        * ina.ADC_8SAMP: 8 samples at 12bit, conversion time 4.26ms.
-        * ina.ADC_16SAMP: 16 samples at 12bit, conversion time 8.51ms
-        * ina.ADC_32SAMP: 32 samples at 12bit, conversion time 17.02ms.
-        * ina.ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
-        * ina.ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
+        * ADC_9BIT: 9bit, conversion time 84us.
+        * ADC_10BIT: 10bit, conversion time 148us.
+        * ADC_11BIT: 11bit, conversion time 276us.
+        * ADC_12BIT: 12bit conversion time 532us (**default**).
+        * ADC_2SAMP: 2 samples at 12bit, conversion time 1.06ms.
+        * ADC_4SAMP: 4 samples at 12bit, conversion time 2.13ms.
+        * ADC_8SAMP: 8 samples at 12bit, conversion time 4.26ms.
+        * ADC_16SAMP: 16 samples at 12bit, conversion time 8.51ms
+        * ADC_32SAMP: 32 samples at 12bit, conversion time 17.02ms.
+        * ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
+        * ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
     * shunt_adc: The shunt ADC resolution (9-, 10-, 11-, or 12-bit), or
         set the number of samples used when averaging results, represented by
         one of the following constants.
-        * ina.ADC_9BIT: 9bit, conversion time 84us.
-        * ina.ADC_10BIT: 10bit, conversion time 148us.
-        * ina.ADC_11BIT: 11bit, conversion time 276us.
-        * ina.ADC_12BIT: 12bit conversion time 532us (**default**).
-        * ina.ADC_2SAMP: 2 samples at 12bit, conversion time 1.06ms.
-        * ina.ADC_4SAMP: 4 samples at 12bit, conversion time 2.13ms.
-        * ina.ADC_8SAMP: 8 samples at 12bit, conversion time 4.26ms.
-        * ina.ADC_16SAMP: 16 samples at 12bit, conversion time 8.51ms
-        * ina.ADC_32SAMP: 32 samples at 12bit, conversion time 17.02ms.
-        * ina.ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
-        * ina.ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
+        * ADC_9BIT: 9bit, conversion time 84us.
+        * ADC_10BIT: 10bit, conversion time 148us.
+        * ADC_11BIT: 11bit, conversion time 276us.
+        * ADC_12BIT: 12bit conversion time 532us (**default**).
+        * ADC_2SAMP: 2 samples at 12bit, conversion time 1.06ms.
+        * ADC_4SAMP: 4 samples at 12bit, conversion time 2.13ms.
+        * ADC_8SAMP: 8 samples at 12bit, conversion time 4.26ms.
+        * ADC_16SAMP: 16 samples at 12bit, conversion time 8.51ms
+        * ADC_32SAMP: 32 samples at 12bit, conversion time 17.02ms.
+        * ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
+        * ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
 * `voltage()` Returns the bus voltage in volts (V).
 * `supply_voltage()` Returns the bus supply voltage in volts (V). This 
     is the sum of the bus voltage and shunt voltage.
