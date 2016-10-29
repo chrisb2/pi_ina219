@@ -22,4 +22,4 @@ setup(name              = 'pi-ina219',
       url               = 'https://github.com/chrisb/pi_ina219/',
       install_requires  = requires,
       test_suite        = 'tests',
-      pymodules         = ['ina219'])
+      py_modules        = ['ina219'])
