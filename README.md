@@ -12,17 +12,12 @@ be minimised.
 
 ## Prerequisites
 
-This library and its dependencies can be installed by executing:
+This library and its dependencies 
+([Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO)) 
+can be installed by executing:
 
 ```shell
 sudo pip install git+git://github.com/chrisb2/pi_ina219.git
-```
-
-The main dependency is the [Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO) 
-which can be seperately installed by executing:
-
-```shell
-sudo pip install adafruit-gpio
 ```
 
 The Adafruit library supports the I2C protocol on all versions of the 
