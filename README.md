@@ -21,7 +21,7 @@ Remember to enable the I2C bus under the *Advanced Options* of *raspi-config*.
 
 ## Usage
 
-The following code demonstates basic usage of this library with a 0.1&Omega; shunt 
+The following code demonstrates basic usage of this library with a 0.1&Omega; shunt 
 resistor and a maximum expected current of _400mA_.
 The address of the sensor in this case is the default of _0x40_.
 
@@ -129,7 +129,7 @@ To understand the calibration calculation results, debug output can be enabled w
 The library comes with a full test suite which can be executed with:
 
 ```shell
- python -m unittest tests.test-all
+ python -m unittest tests.testall
 ```
 
 ## Coding Standard
