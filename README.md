@@ -3,27 +3,41 @@
 This library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf) 
 current and power monitor from Texas Instruments.
 
-The library currently only supports _continuous_ reads of voltage and power, but not _triggered_ reads.
+The library currently only supports _continuous_ reads of voltage and 
+power, but not _triggered_ reads.
 
-The low power mode of the INA219 is supported, so if only occasional reads are being made in a
-battery based system, current consumption can be minimised.
+The low power mode of the INA219 is supported, so if only occasional 
+reads are being made in a battery based system, current consumption can 
+be minimised.
 
 ## Prerequisites
 
-Install the [Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO) by executing:
+This library and its dependencies can be installed by executing:
+
+```shell
+sudo pip install git+git://github.com/chrisb2/pi_ina219.git
+```
+
+The main dependency is the [Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO) 
+which can be seperately installed by executing:
 
 ```shell
 sudo pip install adafruit-gpio
 ```
 
-The Adafruit library supports the I2C protocol on all versions of the Raspberry Pi. 
-Remember to enable the I2C bus under the *Advanced Options* of *raspi-config*.
+The Adafruit library supports the I2C protocol on all versions of the 
+Raspberry Pi. Remember to enable the I2C bus under the *Advanced Options* 
+of *raspi-config*.
 
 ## Usage
 
-The following code demonstrates basic usage of this library with a 0.1&Omega; shunt 
-resistor and a maximum expected current of _400mA_.
+The following code demonstrates basic usage of this library with a 
+0.1&Omega; shunt resistor and a maximum expected current of _400mA_. 
 The address of the sensor in this case is the default of _0x40_.
+
+Note that the bus voltage is that on the load side of the shunt resister, 
+if you want the voltage on the supply side then you should add the bus
+voltage and shunt voltage together.
 
 ```python
 #!/usr/bin/env python
@@ -37,8 +51,8 @@ def read():
     ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS)
     ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
 
-    print "Voltage: %.3f V" % ina.voltage()
-    print "Current: %.3f mA" % ina.current()
+    print "Bus Voltage: %.3f V" % ina.voltage()
+    print "Bus Current: %.3f mA" % ina.current()
     print "Power: %.3f mW" % ina.power()
     print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
 
@@ -118,7 +132,8 @@ The arguments, which are all optional, are:
 
 ## Debugging
 
-To understand the calibration calculation results, debug output can be enabled with:
+To understand the calibration calculation results, debug output can be 
+enabled with:
 
 ```python
     ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS, log_level=logging.DEBUG)
@@ -134,5 +149,5 @@ The library comes with a full test suite which can be executed with:
 
 ## Coding Standard
 
-This library adheres to the *PEP8* standard and follows the *idiomatic* style described
-in the book *Writing Idiomatic Python* by *Jeff Knupp*.
+This library adheres to the *PEP8* standard and follows the *idiomatic* 
+style described in the book *Writing Idiomatic Python* by *Jeff Knupp*.
