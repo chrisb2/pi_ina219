@@ -97,31 +97,31 @@ The arguments, which are all optional, are:
     * bus_adc: The bus ADC resolution (9-, 10-, 11-, or 12-bit), or
         set the number of samples used when averaging results, represented by
         one of the following constants.
-        * ADC_9BIT: 9bit, conversion time 84us.
-        * ADC_10BIT: 10bit, conversion time 148us.
-        * ADC_11BIT: 11bit, conversion time 276us.
-        * ADC_12BIT: 12bit conversion time 532us (**default**).
-        * ADC_2SAMP: 2 samples at 12bit, conversion time 1.06ms.
-        * ADC_4SAMP: 4 samples at 12bit, conversion time 2.13ms.
-        * ADC_8SAMP: 8 samples at 12bit, conversion time 4.26ms.
-        * ADC_16SAMP: 16 samples at 12bit, conversion time 8.51ms
-        * ADC_32SAMP: 32 samples at 12bit, conversion time 17.02ms.
-        * ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
-        * ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
+        * ADC_9BIT: 9 bit, conversion time 84us.
+        * ADC_10BIT: 10 bit, conversion time 148us.
+        * ADC_11BIT: 11 bit, conversion time 276us.
+        * ADC_12BIT: 12 bit conversion time 532us (**default**).
+        * ADC_2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
+        * ADC_4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
+        * ADC_8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
+        * ADC_16SAMP: 16 samples at 12 bit, conversion time 8.51ms
+        * ADC_32SAMP: 32 samples at 12 bit, conversion time 17.02ms.
+        * ADC_64SAMP: 64 samples at 12 bit, conversion time 34.05ms.
+        * ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
     * shunt_adc: The shunt ADC resolution (9-, 10-, 11-, or 12-bit), or
         set the number of samples used when averaging results, represented by
         one of the following constants.
-        * ADC_9BIT: 9bit, conversion time 84us.
-        * ADC_10BIT: 10bit, conversion time 148us.
-        * ADC_11BIT: 11bit, conversion time 276us.
-        * ADC_12BIT: 12bit conversion time 532us (**default**).
-        * ADC_2SAMP: 2 samples at 12bit, conversion time 1.06ms.
-        * ADC_4SAMP: 4 samples at 12bit, conversion time 2.13ms.
-        * ADC_8SAMP: 8 samples at 12bit, conversion time 4.26ms.
-        * ADC_16SAMP: 16 samples at 12bit, conversion time 8.51ms
-        * ADC_32SAMP: 32 samples at 12bit, conversion time 17.02ms.
-        * ADC_64SAMP: 64 samples at 12bit, conversion time 34.05ms.
-        * ADC_128SAMP: 128 samples at 12bit, conversion time 68.10ms.
+        * ADC_9BIT: 9 bit, conversion time 84us.
+        * ADC_10BIT: 10 bit, conversion time 148us.
+        * ADC_11BIT: 11 bit, conversion time 276us.
+        * ADC_12BIT: 12 bit conversion time 532us (**default**).
+        * ADC_2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
+        * ADC_4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
+        * ADC_8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
+        * ADC_16SAMP: 16 samples at 12 bit, conversion time 8.51ms
+        * ADC_32SAMP: 32 samples at 12 bit, conversion time 17.02ms.
+        * ADC_64SAMP: 64 samples at 12 bit, conversion time 34.05ms.
+        * ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
 * `voltage()` Returns the bus voltage in volts (V).
 * `supply_voltage()` Returns the bus supply voltage in volts (V). This 
     is the sum of the bus voltage and shunt voltage.
@@ -130,6 +130,12 @@ The arguments, which are all optional, are:
 * `shunt_voltage()` Returns the shunt voltage in millivolts (mV).
 * `powerdown()` Put the INA219 into power down mode.
 * `reset()` Reset the INA219 to its default configuration.
+
+## Performance
+
+On a Raspberry Pi 2 Model B running Raspbian Jesse and reading a voltage 
+(12-bit) in a loop and writing to file every 1000 reads, a read
+occurred approximately every 10 milliSeconds.
 
 ## Debugging
 
@@ -142,7 +148,8 @@ enabled with:
 
 ## Testing
 
-The library comes with a full test suite which can be executed with:
+The library comes with a full test suite which can be executed from the 
+top level directory with:
 
 ```shell
  python -m unittest tests.testall
