@@ -225,37 +225,22 @@ class INA219:
     def __write_register(self, register, register_value):
         register_bytes = self.__to_bytes(register_value)
         logging.debug(
-            "write register 0x%02x: [%s] 0b%s" %
-            (register, self.__bytes_as_string(register_bytes),
+            "write register 0x%02x: 0x%04x 0b%s" %
+            (register, register_value,
              self.__binary_as_string(register_value)))
         self._i2c.writeList(register, register_bytes)
 
     def __read_register(self, register, negative_value_supported=False):
-        register_bytes = self._i2c.readList(register, 2)
-        register_value = self.__to_value(register_bytes)
-        logging.debug(
-            "read register 0x%02x: [%s] 0b%s" %
-            (register, self.__bytes_as_string(register_bytes),
-             self.__binary_as_string(register_value)))
-        if (negative_value_supported and register_value >> 15):
-            return self.__twos_complement_to_decimal(register_value, 16)
+        if negative_value_supported:
+            register_value = self._i2c.readS16BE(register)
         else:
-            return register_value
-
-    def __twos_complement_to_decimal(self, value, bits):
-        # Convert twos compliment to decimal
-        if (value & (1 << (bits - 1))):
-            result = value - (1 << bits)
-        return result
+            register_value = self._i2c.readU16BE(register)
+        logging.debug(
+            "read register 0x%02x: %d" % (register, register_value))
+        return register_value
 
     def __to_bytes(self, register_value):
         return [(register_value >> 8) & 0xFF, register_value & 0xFF]
-
-    def __to_value(self, register_bytes):
-        return (register_bytes[0] << 8) | (register_bytes[1])
-
-    def __bytes_as_string(self, register_bytes):
-        return ', '.join('0x{:02x}'.format(x) for x in register_bytes)
 
     def __binary_as_string(self, register_value):
         return bin(register_value)[2:].zfill(16)
