@@ -8,7 +8,7 @@ MAX_EXPECTED_AMPS = 0.5
 
 
 def read():
-    ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS, log_level=logging.INFO)
+    ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS, log_level=logging.ERROR)
     ina.configure(ina.RANGE_16V, ina.GAIN_2_80MV)
 
     print "Bus Voltage    : %.3f V" % ina.voltage()

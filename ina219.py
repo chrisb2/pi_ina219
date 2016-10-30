@@ -72,7 +72,7 @@ class INA219:
     __BUS_MILLIVOLTS_LSB = 4  # 4mV
 
     def __init__(self, shunt_ohms, max_expected_amps, address=__ADDRESS,
-                 log_level=logging.INFO):
+                 log_level=logging.ERROR):
         """ Construct the class passing in the resistance of the shunt
         resistor and the maximum expected current flowing through it in
         your system.

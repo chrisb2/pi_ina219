@@ -5,7 +5,7 @@ from mock import Mock, call
 from ina219 import INA219
 
 logger = logging.getLogger()
-logger.level = logging.INFO
+logger.level = logging.ERROR
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
