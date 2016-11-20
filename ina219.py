@@ -52,6 +52,8 @@ class INA219:
     __MODE2 = 1
     __MODE1 = 0
 
+    __OVF = 1
+
     __BUS_RANGE = [16, 32]
     __GAIN_VOLTS = [0.04, 0.08, 0.16, 0.32]
 
@@ -62,6 +64,9 @@ class INA219:
                      'between min lsb %.3e and max lsb %.3e')
     __AMP_ERR_MSG = ('Expected current %.3fA is greater '
                      'than max possible current %.3fA')
+    __OVF_WRN_MSH = ('Current overflow detection is not operative, invalid '
+                     'current/power readings are possible, '
+                     'the current_overflow() method cannot be used')
 
     __LOG_FORMAT = '%(asctime)s - %(levelname)s - INA219 %(message)s'
     __LOG_MSG_1 = ('shunt ohms: %.3f, bus max volts: %d, '
@@ -88,6 +93,8 @@ class INA219:
         self._i2c = I2C.get_i2c_device(address)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
+        self._current_overflow = 0
+        self._overflow_operative = True
 
     def configure(self, voltage_range=RANGE_32V, gain=GAIN_8_320MV,
                   bus_adc=ADC_12BIT, shunt_adc=ADC_12BIT):
@@ -101,13 +108,13 @@ class INA219:
             voltage represented by one of the following constants;
             GAIN_1_40MV, GAIN_2_80MV, GAIN_4_160MV,
             GAIN_8_320MV (default).
-        bus_adc -- The bus ADC resolution (9-, 10-, 11-, or 12-bit) or
+        bus_adc -- The bus ADC resolution (9, 10, 11, or 12-bit) or
             set the number of samples used when averaging results
             represent by one of the following constants; ADC_9BIT,
             ADC_10BIT, ADC_11BIT, ADC_12BIT (default),
             ADC_2SAMP, ADC_4SAMP, ADC_8SAMP, ADC_16SAMP,
             ADC_32SAMP, ADC_64SAMP, ADC_128SAMP
-        shunt_adc -- The shunt ADC resolution (9-, 10-, 11-, or 12-bit) or
+        shunt_adc -- The shunt ADC resolution (9, 10, 11, or 12-bit) or
             set the number of samples used when averaging results
             represent by one of the following constants; ADC_9BIT,
             ADC_10BIT, ADC_11BIT, ADC_12BIT (default),
@@ -151,6 +158,14 @@ class INA219:
         """ Put the INA219 into power down mode. """
         self._configuration_register(self.__PWR_DOWN)
 
+    def current_overflow(self):
+        """ Returns true if the sensor has detect current overflow. In
+        this case the current and power values are invalid."""
+        if self._overflow_operative:
+            return self._current_overflow
+        else:
+            raise RuntimeError('Current overflows cannot be detected')
+
     def reset(self):
         """ Reset the INA219 to its default configuration. """
         self._configuration_register(1 << self.__RST)
@@ -162,22 +177,24 @@ class INA219:
             self.__CONT_SH_BUS)
         self._configuration_register(configuration)
 
-    def _calibrate(self, bus_volts_max, shunt_volts_max, bus_amps_max):
+    def _calibrate(self, bus_volts_max, shunt_volts_max, max_expected_amps):
         max_possible_amps = shunt_volts_max / self._shunt_ohms
-        if bus_amps_max > round(max_possible_amps, 3):
+        if max_expected_amps > round(max_possible_amps, 3):
             raise ValueError(self.__AMP_ERR_MSG %
-                             (bus_amps_max, max_possible_amps))
+                             (max_expected_amps, max_possible_amps))
 
-        logging.debug("max possible current: %.3fA" %
-                      max_possible_amps)
+        logging.info("max possible current: %.3fA" %
+                     max_possible_amps)
+        logging.info("max expected current: %.3fA" %
+                     max_expected_amps)
 
-        min_current_lsb = float(bus_amps_max) / 32767
-        max_current_lsb = float(bus_amps_max) / 4096
+        min_current_lsb = float(max_expected_amps) / 32767
+        max_current_lsb = float(max_expected_amps) / 4096
 
         self._current_lsb = self.__select_min_rounded_lsb(min_current_lsb)
-        logging.debug("min current LSB: %.3e A/bit" % min_current_lsb)
-        logging.debug("max current LSB: %.3e A/bit" % max_current_lsb)
-        logging.debug("chosen current LSB: %.3e A/bit" % self._current_lsb)
+        logging.info("min current LSB: %.3e A/bit" % min_current_lsb)
+        logging.info("max current LSB: %.3e A/bit" % max_current_lsb)
+        logging.info("chosen current LSB: %.3e A/bit" % self._current_lsb)
 
         if self._current_lsb > max_current_lsb:
             raise ValueError(
@@ -185,9 +202,28 @@ class INA219:
                 (self._current_lsb, min_current_lsb, max_current_lsb))
 
         self._power_lsb = self._current_lsb * 20
-        logging.debug("power LSB: %.3e W/bit" % self._power_lsb)
+        logging.info("power LSB: %.3e W/bit" % self._power_lsb)
+
+        max_current = self._current_lsb * 32767
+        if max_current >= max_possible_amps:
+            max_current_before_overflow = max_possible_amps
+        else:
+            max_current_before_overflow = max_current
+        logging.info("max current before overflow: %.3fA" %
+                     max_current_before_overflow)
+
+        max_shunt_voltage = max_current_before_overflow * self._shunt_ohms
+        if max_shunt_voltage >= shunt_volts_max:
+            max_shunt_voltage_before_overflow = shunt_volts_max
+            self._overflow_operative = False
+            logging.warn(self.__OVF_WRN_MSH)
+        else:
+            max_shunt_voltage_before_overflow = max_shunt_voltage
+        logging.info("max shunt voltage before overflow: %.3fV" %
+                     max_shunt_voltage_before_overflow)
 
         calibration = trunc(0.04096 / (self._current_lsb * self._shunt_ohms))
+        logging.info("calibration: %d" % calibration)
         self._calibration_register(calibration)
 
     def _configuration_register(self, register_value):
@@ -200,6 +236,7 @@ class INA219:
 
     def _voltage_register(self):
         register_value = self.__read_register(self.__REG_BUSVOLTAGE)
+        self._current_overflow = register_value & self.__OVF
         return register_value >> 3
 
     def _current_register(self):
