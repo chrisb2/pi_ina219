@@ -1,6 +1,7 @@
 """ This library supports the INA219 current and power monitor
 from Texas Instruments with a Raspberry Pi using the I2C bus."""
 import logging
+import warnings
 from math import log10, floor, ceil, trunc
 import Adafruit_GPIO.I2C as I2C
 
@@ -216,7 +217,7 @@ class INA219:
         if max_shunt_voltage >= shunt_volts_max:
             max_shunt_voltage_before_overflow = shunt_volts_max
             self._overflow_operative = False
-            logging.warn(self.__OVF_WRN_MSH)
+            warnings.warn(self.__OVF_WRN_MSH)
         else:
             max_shunt_voltage_before_overflow = max_shunt_voltage
         logging.info("max shunt voltage before overflow: %.3fV" %

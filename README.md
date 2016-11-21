@@ -6,13 +6,13 @@ current and power monitor from Texas Instruments.
 The library currently only supports _continuous_ reads of voltage and 
 power, but not _triggered_ reads.
 
-Detection of _overflow_ in the current/power calculations which results
-in meaningless values for current and power, is supported if the device
-calibration allows overflow detection. If device calibration
-does not allow overflow detection then a warning is written to the 
-console. This warning may be ignored if you are confident that overflow
-cannot occur in your system. To avoid the warning and allow overflow
-detection increase the gain.
+The library supports the detection of _overflow_ in the current/power 
+calculations which results in meaningless values for current and power. 
+This support depends on the calibration of the device. If the device 
+calibration does not allow overflow detection then a warning is written 
+to the console. This warning may be ignored if you are confident that 
+overflow cannot occur in your system. To avoid the warning and allow 
+overflow detection increase the gain.
 
 The low power mode of the INA219 is supported, so if only occasional 
 reads are being made in a battery based system, current consumption can 
@@ -120,7 +120,7 @@ The arguments, which are all optional, are:
         * ADC_9BIT: 9 bit, conversion time 84us.
         * ADC_10BIT: 10 bit, conversion time 148us.
         * ADC_11BIT: 11 bit, conversion time 276us.
-        * ADC_12BIT: 12 bit conversion time 532us (**default**).
+        * ADC_12BIT: 12 bit, conversion time 532us (**default**).
         * ADC_2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
         * ADC_4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
         * ADC_8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
@@ -134,7 +134,7 @@ The arguments, which are all optional, are:
         * ADC_9BIT: 9 bit, conversion time 84us.
         * ADC_10BIT: 10 bit, conversion time 148us.
         * ADC_11BIT: 11 bit, conversion time 276us.
-        * ADC_12BIT: 12 bit conversion time 532us (**default**).
+        * ADC_12BIT: 12 bit, conversion time 532us (**default**).
         * ADC_2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
         * ADC_4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
         * ADC_8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
