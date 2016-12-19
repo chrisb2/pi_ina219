@@ -38,7 +38,7 @@ of *raspi-config*.
 ## Usage
 
 The following code demonstrates basic usage of this library with a 
-0.1&Omega; shunt resistor and a maximum expected current of _400mA_. 
+0.1&Omega; shunt resistor and a maximum expected current of _200mA_. 
 The address of the sensor in this case is the default of _0x40_.
 
 Note that the bus voltage is that on the load side of the shunt resister, 
@@ -46,17 +46,19 @@ if you want the voltage on the supply side then you should add the bus
 voltage and shunt voltage together, or use the *supply_voltage()* 
 function.
 
+The gain is automatically calculated to maximise the resolution.
+
 ```python
 #!/usr/bin/env python
 from ina219 import INA219
 
 SHUNT_OHMS = 0.1
-MAX_EXPECTED_AMPS = 0.4
+MAX_EXPECTED_AMPS = 0.2
 
 
 def read():
     ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS)
-    ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
+    ina.configure(ina.RANGE_16V)
 
     print "Bus Voltage: %.3f V" % ina.voltage()
     print "Bus Current: %.3f mA" % ina.current()
@@ -113,7 +115,8 @@ The arguments, which are all optional, are:
         * GAIN_1_40MV: Maximum shunt voltage 40mV
         * GAIN_2_80MV: Maximum shunt voltage 80mV
         * GAIN_4_160MV: Maximum shunt voltage 160mV
-        * GAIN_8_320MV: Maximum shunt voltage 320mV (**default**)
+        * GAIN_8_320MV: Maximum shunt voltage 320mV
+        * GAIN_AUTO: Automatically calculate the gain (**default**)
     * bus_adc: The bus ADC resolution (9, 10, 11, or 12-bit), or
         set the number of samples used when averaging results, represented by
         one of the following constants.

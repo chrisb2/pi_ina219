@@ -15,6 +15,7 @@ class INA219:
     GAIN_2_80MV = 1  # Maximum shut voltage 80mV
     GAIN_4_160MV = 2  # Maximum shut voltage 160mV
     GAIN_8_320MV = 3  # Maximum shut voltage 320mV
+    GAIN_AUTO = -1  # Determine gain automatically
 
     ADC_9BIT = 0  # 9bit conversion time  84us.
     ADC_10BIT = 1  # 10bit conversion time 148us.
@@ -68,6 +69,8 @@ class INA219:
     __OVF_WRN_MSH = ('Current overflow detection is not operative, invalid '
                      'current/power readings are possible, '
                      'the current_overflow() method cannot be used')
+    __RNG_ERR_MSG = ('Expected amps %.2fA, out of range, use a lower '
+                     'value shunt resistor')
 
     __LOG_FORMAT = '%(asctime)s - %(levelname)s - INA219 %(message)s'
     __LOG_MSG_1 = ('shunt ohms: %.3f, bus max volts: %d, '
@@ -97,7 +100,7 @@ class INA219:
         self._current_overflow = 0
         self._overflow_operative = True
 
-    def configure(self, voltage_range=RANGE_32V, gain=GAIN_8_320MV,
+    def configure(self, voltage_range=RANGE_32V, gain=GAIN_AUTO,
                   bus_adc=ADC_12BIT, shunt_adc=ADC_12BIT):
         """ Configures and calibrates how the INA219 will take measurements.
 
@@ -108,7 +111,7 @@ class INA219:
         gain -- The gain which controls the maximum range of the shunt
             voltage represented by one of the following constants;
             GAIN_1_40MV, GAIN_2_80MV, GAIN_4_160MV,
-            GAIN_8_320MV (default).
+            GAIN_8_320MV, GAIN_AUTO (default).
         bus_adc -- The bus ADC resolution (9, 10, 11, or 12-bit) or
             set the number of samples used when averaging results
             represent by one of the following constants; ADC_9BIT,
@@ -123,6 +126,12 @@ class INA219:
             ADC_32SAMP, ADC_64SAMP, ADC_128SAMP
         """
         self.__validate_voltage_range(voltage_range)
+
+        if gain == self.GAIN_AUTO:
+            gain = self._determine_gain()
+            logging.info('gain automatically set to %.2fV' %
+                         self.__GAIN_VOLTS[gain])
+
         logging.debug(
             self.__LOG_MSG_1 %
             (self._shunt_ohms, self.__BUS_RANGE[voltage_range],
@@ -170,6 +179,13 @@ class INA219:
     def reset(self):
         """ Reset the INA219 to its default configuration. """
         self._configuration_register(1 << self.__RST)
+
+    def _determine_gain(self):
+        shunt_v = self._max_expected_amps * self._shunt_ohms
+        if shunt_v > self.__GAIN_VOLTS[3]:
+            raise ValueError(self.__RNG_ERR_MSG % self._max_expected_amps)
+        gain = min(v for v in self.__GAIN_VOLTS if v > shunt_v)
+        return self.__GAIN_VOLTS.index(gain)
 
     def _configure(self, voltage_range, gain, bus_adc, shunt_adc):
         configuration = (

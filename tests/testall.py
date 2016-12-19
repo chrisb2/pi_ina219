@@ -28,6 +28,16 @@ class TestConfiguration(unittest.TestCase):
         self.ina = INA219(0.1, 0.4)
         self.ina._i2c.writeList = Mock()
 
+    def test_auto_gain(self):
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
+        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x09, 0x9f])]
+        self.ina._i2c.writeList.assert_has_calls(calls)
+
+    def test_auto_gain_out_of_range(self):
+        self.ina = INA219(0.1, 4)
+        with self.assertRaisesRegexp(ValueError, "Expected amps"):
+            self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
+
     def test_16v_40mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x01, 0x9f])]
@@ -206,6 +216,7 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.readU16BE = Mock(return_value=4001)
         self.assertEqual(self.ina.voltage(), 2.0)
         self.assertTrue(self.ina.current_overflow())
+
 
 if __name__ == '__main__':
     unittest.main()
