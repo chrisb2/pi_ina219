@@ -174,11 +174,13 @@ can be enabled with:
 
 ## Testing
 
-If you have cloned the library from Github the full test suite can be 
-executed from the top level directory with:
+Install the library as described above, this will install all the
+dependencies required for the unit tests, as well as the library 
+itself. Clone the library source from Github then execute the test suite
+from the top level directory with:
 
 ```shell
- python -m unittest tests.testall
+python -m unittest tests.testall
 ```
 
 ## Coding Standard

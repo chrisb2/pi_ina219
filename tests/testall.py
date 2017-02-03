@@ -139,6 +139,7 @@ class TestRead(unittest.TestCase):
 
     def setUp(self):
         self.ina = INA219(0.1, 0.4)
+        self.ina._i2c.writeList = Mock()
 
     def test_read_32v(self):
         self.ina._i2c.readU16BE = Mock(return_value=64000)
