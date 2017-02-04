@@ -16,8 +16,8 @@ class TestConstructor(unittest.TestCase):
     def test_default(self, device):
         device.return_value = Mock()
         self.ina = INA219(0.1, 0.4)
-        self.assertEquals(self.ina._shunt_ohms, 0.1)
-        self.assertEquals(self.ina._max_expected_amps, 0.4)
+        self.assertEqual(self.ina._shunt_ohms, 0.1)
+        self.assertEqual(self.ina._max_expected_amps, 0.4)
 
 
 class TestConfiguration(unittest.TestCase):
