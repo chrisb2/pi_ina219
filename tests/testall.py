@@ -14,7 +14,7 @@ class TestConstructor(unittest.TestCase):
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def setUp(self, device):
-        device.return_value = I2C.Device(0x40, 1)
+        device.return_value = Mock()
 
     def test_default(self):
         self.ina = INA219(0.1, 0.4)
@@ -30,7 +30,7 @@ class TestConfiguration(unittest.TestCase):
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def setUp(self, device):
-        device.return_value = I2C.Device(0x40, 1)
+        device.return_value = Mock()
         self.ina = INA219(0.1, 0.4)
         self.ina._i2c.writeList = Mock()
 
@@ -151,7 +151,7 @@ class TestRead(unittest.TestCase):
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def setUp(self, device):
-        device.return_value = I2C.Device(0x40, 1)
+        device.return_value = Mock()
         self.ina = INA219(0.1, 0.4)
         self.ina._i2c.writeList = Mock()
 
