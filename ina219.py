@@ -2,6 +2,7 @@
 from Texas Instruments with a Raspberry Pi using the I2C bus."""
 import logging
 import warnings
+import time
 from math import log10, floor, ceil, trunc
 import Adafruit_GPIO.I2C as I2C
 
@@ -59,7 +60,6 @@ class INA219:
     __BUS_RANGE = [16, 32]
     __GAIN_VOLTS = [0.04, 0.08, 0.16, 0.32]
 
-    __PWR_DOWN = 0
     __CONT_SH_BUS = 7
 
     __LSB_ERR_MSG = ('Calibration error, current lsb %.3e must be '
@@ -164,9 +164,17 @@ class INA219:
         """ Returns the shunt voltage in millivolts. """
         return self._shunt_voltage_register() * self.__SHUNT_MILLIVOLTS_LSB
 
-    def powerdown(self):
+    def sleep(self):
         """ Put the INA219 into power down mode. """
-        self._configuration_register(self.__PWR_DOWN)
+        configuration = self.__read_register(self.__REG_CONFIG)
+        self._configuration_register(configuration & 0xFFF8)
+
+    def wake(self):
+        """ Wake the INA219 from power down mode """
+        configuration = self.__read_register(self.__REG_CONFIG)
+        self._configuration_register(configuration | 0x0007)
+        # 40us delay to recover from powerdown (p14 of spec)
+        time.sleep(0.00004)
 
     def current_overflow(self):
         """ Returns true if the sensor has detect current overflow. In

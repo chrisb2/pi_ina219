@@ -126,9 +126,15 @@ class TestConfiguration(unittest.TestCase):
         self.ina._i2c.writeList.assert_has_calls(calls)
         self.assertTrue(self.ina._overflow_operative)
 
-    def test_powerdown(self):
-        self.ina.powerdown()
-        self.ina._i2c.writeList.assert_called_with(0x00, [0x00, 0x00])
+    def test_sleep(self):
+        self.ina._i2c.readU16BE = Mock(return_value=0xf)
+        self.ina.sleep()
+        self.ina._i2c.writeList.assert_called_with(0x00, [0x00, 0x08])
+
+    def test_wake(self):
+        self.ina._i2c.readU16BE = Mock(return_value=0x8)
+        self.ina.wake()
+        self.ina._i2c.writeList.assert_called_with(0x00, [0x00, 0xf])
 
     def test_reset(self):
         self.ina.reset()

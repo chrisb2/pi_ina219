@@ -78,12 +78,16 @@ ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS, address=0x41)
 The sensor may be put in low power mode between reads as follows:
 
 ```python
+ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
 while True:
-    ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
     print "Voltage : %.3f V" % ina.voltage()
-    ina.powerdown()
-    time.sleep(300)
+    ina.sleep()
+    time.sleep(60)
+    ina.wake();
 ```
+
+Note that if you do not wake the device after sleeping, the value 
+returned from a read will be the previous value taken before sleeping.
 
 Current overflow can be detected and meaningless values for current and 
 power can be avoided as follows:
@@ -155,7 +159,8 @@ The arguments, which are all optional, are:
 overflows can be detected, then this method returns 'True' if an overflow
 has occured. If the configuration cannot detect overflows a
 _RuntimeException_ is thrown.
-* `powerdown()` Put the INA219 into power down mode.
+* `sleep()` Put the INA219 into power down mode.
+* `wake()` Wake the INA219 from power down mode.
 * `reset()` Reset the INA219 to its default configuration.
 
 ## Performance

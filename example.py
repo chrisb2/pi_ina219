@@ -17,8 +17,6 @@ def read():
     print "Shunt voltage  : %.3f mV" % ina.shunt_voltage()
     print "Power          : %.3f mW" % ina.power()
 
-    ina.powerdown()
-
 
 if __name__ == "__main__":
     read()
