@@ -1,7 +1,8 @@
 import sys
 import logging
 import unittest
-from mock import Mock, call
+import Adafruit_GPIO.I2C as I2C
+from mock import Mock, call, patch
 from ina219 import INA219
 
 logger = logging.getLogger()
@@ -11,11 +12,14 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 class TestConstructor(unittest.TestCase):
 
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def setUp(self, device):
+        device.return_value = I2C.Device(0x40, 1)
+
     def test_default(self):
         self.ina = INA219(0.1, 0.4)
         self.assertEquals(self.ina._shunt_ohms, 0.1)
         self.assertEquals(self.ina._max_expected_amps, 0.4)
-        self.assertEquals(self.ina._i2c._address, 0x40)
 
     def test_device_address(self):
         self.ina = INA219(0.1, 0.4, 0x41)
@@ -24,7 +28,9 @@ class TestConstructor(unittest.TestCase):
 
 class TestConfiguration(unittest.TestCase):
 
-    def setUp(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def setUp(self, device):
+        device.return_value = I2C.Device(0x40, 1)
         self.ina = INA219(0.1, 0.4)
         self.ina._i2c.writeList = Mock()
 
@@ -143,7 +149,9 @@ class TestConfiguration(unittest.TestCase):
 
 class TestRead(unittest.TestCase):
 
-    def setUp(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def setUp(self, device):
+        device.return_value = I2C.Device(0x40, 1)
         self.ina = INA219(0.1, 0.4)
         self.ina._i2c.writeList = Mock()
 
