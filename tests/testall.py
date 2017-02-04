@@ -13,15 +13,15 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 class TestConstructor(unittest.TestCase):
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
-    def setUp(self, device):
+    def test_default(self, device):
         device.return_value = Mock()
-
-    def test_default(self):
         self.ina = INA219(0.1, 0.4)
         self.assertEquals(self.ina._shunt_ohms, 0.1)
         self.assertEquals(self.ina._max_expected_amps, 0.4)
 
-    def test_device_address(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_device_address(self, device):
+        device.return_value = Mock()
         self.ina = INA219(0.1, 0.4, 0x41)
         self.assertEquals(self.ina._i2c._address, 0x41)
 
@@ -39,7 +39,9 @@ class TestConfiguration(unittest.TestCase):
         calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x09, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
-    def test_auto_gain_out_of_range(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_auto_gain_out_of_range(self, device):
+        device.return_value = Mock()
         self.ina = INA219(0.1, 4)
         with self.assertRaisesRegexp(ValueError, "Expected amps"):
             self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
@@ -115,7 +117,9 @@ class TestConfiguration(unittest.TestCase):
         with self.assertRaisesRegexp(ValueError, "Invalid voltage range"):
             self.ina.configure(64, self.ina.GAIN_1_40MV)
 
-    def test_max_current_exceeded(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_max_current_exceeded(self, device):
+        device.return_value = Mock()
         ina = INA219(0.1, 0.5)
         with self.assertRaisesRegexp(ValueError, "Expected current"):
             ina.configure(ina.RANGE_32V, ina.GAIN_1_40MV)
