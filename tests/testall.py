@@ -19,12 +19,6 @@ class TestConstructor(unittest.TestCase):
         self.assertEquals(self.ina._shunt_ohms, 0.1)
         self.assertEquals(self.ina._max_expected_amps, 0.4)
 
-    @patch('Adafruit_GPIO.I2C.get_i2c_device')
-    def test_device_address(self, device):
-        device.return_value = Mock()
-        self.ina = INA219(0.1, 0.4, 0x41)
-        self.assertEquals(self.ina._i2c._address, 0x41)
-
 
 class TestConfiguration(unittest.TestCase):
 
