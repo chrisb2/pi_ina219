@@ -14,7 +14,7 @@ import sys
 requires = ['Adafruit_GPIO', 'mock']
 
 setup(name              = 'pi-ina219',
-      version           = '1.0.2',
+      version           = '1.1.0',
       author            = 'Chris Borrill',
       author_email      = 'chris.borrill@gmail.com',
       description       = 'Library that supports the INA219 current and power monitor from Texas Instruments.',

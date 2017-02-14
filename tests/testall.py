@@ -1,12 +1,11 @@
 import sys
 import logging
 import unittest
-import Adafruit_GPIO.I2C as I2C
 from mock import Mock, call, patch
 from ina219 import INA219
 
 logger = logging.getLogger()
-logger.level = logging.ERROR
+logger.level = logging.DEBUG
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
@@ -14,6 +13,17 @@ class TestConstructor(unittest.TestCase):
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def test_default(self, device):
+        device.return_value = Mock()
+        self.ina = INA219(0.1)
+        self.assertEqual(self.ina._shunt_ohms, 0.1)
+        self.assertIsNone(self.ina._max_expected_amps)
+        self.assertEqual(self.ina._current_overflow, 0)
+        self.assertTrue(self.ina._overflow_operative)
+        self.assertIsNone(self.ina._gain)
+        self.assertFalse(self.ina._auto_gain_enabled)
+
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_with_max_expected_amps(self, device):
         device.return_value = Mock()
         self.ina = INA219(0.1, 0.4)
         self.assertEqual(self.ina._shunt_ohms, 0.1)
@@ -30,6 +40,9 @@ class TestConfiguration(unittest.TestCase):
 
     def test_auto_gain(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
+        self.assertEqual(self.ina._gain, 1)
+        self.assertEqual(self.ina._voltage_range, 0)
+        self.assertTrue(self.ina._auto_gain_enabled)
         calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x09, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
@@ -42,6 +55,7 @@ class TestConfiguration(unittest.TestCase):
 
     def test_16v_40mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.assertEqual(self.ina._gain, 0)
         calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x01, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
@@ -229,6 +243,17 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.readU16BE = Mock(return_value=4001)
         self.assertEqual(self.ina.voltage(), 2.0)
         self.assertTrue(self.ina.current_overflow())
+
+    def test_auto_gain(self):
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
+        self.ina._i2c.readU16BE = Mock()
+        self.ina._i2c.readU16BE.side_effect = lambda x: {0x02: 4001, 0x00: 10655}[x]
+
+        self.ina.voltage()
+        self.ina.current()
+
+        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x20, 0x07])]
+        self.ina._i2c.writeList.assert_has_calls(calls)
 
 
 if __name__ == '__main__':
