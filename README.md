@@ -1,5 +1,7 @@
 # Raspberry Pi Python Library for Voltage and Current Sensors Using the INA219
 
+[![Build Status](https://travis-ci.org/chrisb2/pi_ina219.svg?branch=master)](https://travis-ci.org/chrisb2/pi_ina219)
+
 This Python library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf) 
 current and power monitor from Texas Instruments.
 

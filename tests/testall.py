@@ -1,7 +1,6 @@
 import sys
 import logging
 import unittest
-import Adafruit_GPIO.I2C as I2C
 from mock import Mock, call, patch
 from ina219 import INA219
 
