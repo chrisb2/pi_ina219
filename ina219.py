@@ -1,9 +1,8 @@
 """ This library supports the INA219 current and power monitor
 from Texas Instruments with a Raspberry Pi using the I2C bus."""
 import logging
-import warnings
 import time
-from math import log10, floor, ceil, trunc
+from math import trunc
 import Adafruit_GPIO.I2C as I2C
 
 
@@ -62,13 +61,8 @@ class INA219:
 
     __CONT_SH_BUS = 7
 
-    __LSB_ERR_MSG = ('Calibration error, current lsb %.3e must be '
-                     'between min lsb %.3e and max lsb %.3e')
     __AMP_ERR_MSG = ('Expected current %.3fA is greater '
                      'than max possible current %.3fA')
-    __OVF_WRN_MSH = ('Current overflow detection is not operative, invalid '
-                     'current/power readings are possible, '
-                     'the current_overflow() method cannot be used')
     __RNG_ERR_MSG = ('Expected amps %.2fA, out of range, use a lower '
                      'value shunt resistor')
 
@@ -76,9 +70,12 @@ class INA219:
     __LOG_MSG_1 = ('shunt ohms: %.3f, bus max volts: %d, '
                    'shunt volts max: %.2f, max expected amps: %.3f, '
                    'bus ADC: %d, shunt ADC: %d')
+    __LOG_MSG_2 = ('calibrate called with: bus max volts: %dV, '
+                   'max shunt volts: %.2fV, max expected amps: %.3fA')
 
     __SHUNT_MILLIVOLTS_LSB = 0.01  # 10uV
     __BUS_MILLIVOLTS_LSB = 4  # 4mV
+    __CURRENT_LSB_FACTOR = 33422
 
     def __init__(self, shunt_ohms, max_expected_amps=None, address=__ADDRESS,
                  log_level=logging.ERROR):
@@ -134,7 +131,7 @@ class INA219:
             self._auto_gain_enabled = True
             self._gain = self._determine_gain()
             logging.info('gain automatically set to %.2fV' %
-                         self.__GAIN_VOLTS[gain])
+                         self.__GAIN_VOLTS[self._gain])
         else:
             self._gain = gain
 
@@ -143,6 +140,7 @@ class INA219:
             (self._shunt_ohms, self.__BUS_RANGE[voltage_range],
              self.__GAIN_VOLTS[self._gain], self._max_expected_amps,
              bus_adc, shunt_adc))
+
         self._calibrate(
             self.__BUS_RANGE[voltage_range], self.__GAIN_VOLTS[self._gain],
             self._max_expected_amps)
@@ -162,15 +160,14 @@ class INA219:
         """ Returns the bus current in milliamps. """
         if self._auto_gain_enabled:
             while self.current_overflow():
-                configuration = self.__read_register(self.__REG_CONFIG)
-                gain = configuration & 0x1800
-                logging.debug("Current gain: %d" % gain)
-                if gain < len(self._GAIN_VOLTS) - 1:
+                gain = self._read_current_gain()
+                if gain < len(self.__GAIN_VOLTS) - 1:
                     gain = gain + 1
                     self._calibrate(
                         self.__BUS_RANGE[self._voltage_range],
-                        self.__GAIN_VOLTS[gain], None)
+                        self.__GAIN_VOLTS[gain], -1)
                     self._configure_gain(gain)
+                    self.voltage()
                 else:
                     raise RuntimeError('Current out of range (overflow)')
 
@@ -222,53 +219,36 @@ class INA219:
             self.__CONT_SH_BUS)
         self._configuration_register(configuration)
 
-    def _calibrate(self, bus_volts_max, shunt_volts_max, max_expected_amps):
+    def _calibrate(self, bus_volts_max, shunt_volts_max, max_expected_amps=-1):
+        logging.info(self.__LOG_MSG_2 %
+                     (bus_volts_max, shunt_volts_max, max_expected_amps))
+
         max_possible_amps = shunt_volts_max / self._shunt_ohms
+
         logging.info("max possible current: %.3fA" %
                      max_possible_amps)
 
-        if max_expected_amps is not None:
+        if max_expected_amps != -1:
             if max_expected_amps > round(max_possible_amps, 3):
                 raise ValueError(self.__AMP_ERR_MSG %
                                  (max_expected_amps, max_possible_amps))
-            min_current_lsb = float(max_expected_amps) / 32767
-            max_current_lsb = float(max_expected_amps) / 4096
+            self._current_lsb = max_expected_amps / self.__CURRENT_LSB_FACTOR
             logging.info("max expected current: %.3fA" %
                          max_expected_amps)
         else:
-            min_current_lsb = float(max_possible_amps) / 32767
-            max_current_lsb = float(max_possible_amps) / 4096
+            self._current_lsb = max_possible_amps / self.__CURRENT_LSB_FACTOR
 
-        self._current_lsb = self.__select_min_rounded_lsb(min_current_lsb)
-        logging.info("min current LSB: %.3e A/bit" % min_current_lsb)
-        logging.info("max current LSB: %.3e A/bit" % max_current_lsb)
         logging.info("chosen current LSB: %.3e A/bit" % self._current_lsb)
-
-        if self._current_lsb > max_current_lsb:
-            raise ValueError(
-                self.__LSB_ERR_MSG %
-                (self._current_lsb, min_current_lsb, max_current_lsb))
 
         self._power_lsb = self._current_lsb * 20
         logging.info("power LSB: %.3e W/bit" % self._power_lsb)
 
         max_current = self._current_lsb * 32767
-        if max_current >= max_possible_amps:
-            max_current_before_overflow = max_possible_amps
-        else:
-            max_current_before_overflow = max_current
-        logging.info("max current before overflow: %.3fA" %
-                     max_current_before_overflow)
+        logging.info("max current before overflow: %.3fA" % max_current)
 
-        max_shunt_voltage = max_current_before_overflow * self._shunt_ohms
-        if max_shunt_voltage >= shunt_volts_max:
-            max_shunt_voltage_before_overflow = shunt_volts_max
-            self._overflow_operative = False
-            warnings.warn(self.__OVF_WRN_MSH)
-        else:
-            max_shunt_voltage_before_overflow = max_shunt_voltage
+        max_shunt_voltage = max_current * self._shunt_ohms
         logging.info("max shunt voltage before overflow: %.3fV" %
-                     max_shunt_voltage_before_overflow)
+                     max_shunt_voltage)
 
         calibration = trunc(0.04096 / (self._current_lsb * self._shunt_ohms))
         logging.info("calibration: %d" % calibration)
@@ -278,19 +258,33 @@ class INA219:
         logging.debug("configuration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CONFIG, register_value)
 
+    def _read_configuration(self):
+        return self.__read_register(self.__REG_CONFIG)
+
+    def _read_current_gain(self):
+        configuration = self._read_configuration()
+        gain = configuration & 0x1800 >> self.__PG1
+        logging.debug("Current gain: %.2fV" % self.__GAIN_VOLTS[gain])
+        return gain
+
     def _configure_gain(self, gain):
-        configuration = self.__read_register(self.__REG_CONFIG)
+        configuration = self._read_configuration()
+        logging.debug(self.__binary_as_string(configuration))
         configuration = configuration & 0xE7FF
-        self._configuration_register(configuration | gain << self.__PG0)
+        logging.debug(self.__binary_as_string(configuration))
+        self._configuration_register(configuration | (gain << self.__PG0))
 
     def _calibration_register(self, register_value):
         logging.debug("calibration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CALIBRATION, register_value)
 
     def _voltage_register(self):
-        register_value = self.__read_register(self.__REG_BUSVOLTAGE)
+        register_value = self._read_voltage_register()
         self._current_overflow = register_value & self.__OVF
         return register_value >> 3
+
+    def _read_voltage_register(self):
+        return self.__read_register(self.__REG_BUSVOLTAGE)
 
     def _current_register(self):
         return self.__read_register(self.__REG_CURRENT, True)
@@ -304,13 +298,6 @@ class INA219:
     def __validate_voltage_range(self, voltage_range):
         if voltage_range > len(self.__BUS_RANGE) - 1:
             raise ValueError("Invalid voltage range")
-
-    def __select_min_rounded_lsb(self, x):
-        if not x:
-            return 0
-        power = -int(floor(log10(abs(x))))
-        factor = (10 ** power)
-        return ceil(x * factor) / factor
 
     def __write_register(self, register, register_value):
         register_bytes = self.__to_bytes(register_value)

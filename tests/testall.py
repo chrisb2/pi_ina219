@@ -43,7 +43,7 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(self.ina._gain, 1)
         self.assertEqual(self.ina._voltage_range, 0)
         self.assertTrue(self.ina._auto_gain_enabled)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x09, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
@@ -56,69 +56,69 @@ class TestConfiguration(unittest.TestCase):
     def test_16v_40mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         self.assertEqual(self.ina._gain, 0)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x01, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x01, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_1_40MV)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x21, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x21, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_80mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_2_80MV)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x29, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x29, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_160mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_4_160MV)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x31, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x31, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_320mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_8_320MV)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x39, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x39, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_9bit(self):
         self.ina.configure(
             self.ina.RANGE_32V, self.ina.GAIN_1_40MV,
             self.ina.ADC_9BIT, self.ina.ADC_9BIT)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x20, 0x07])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x20, 0x07])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_10_bit_11_bit(self):
         self.ina.configure(
             self.ina.RANGE_32V, self.ina.GAIN_1_40MV,
             self.ina.ADC_10BIT, self.ina.ADC_11BIT)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x20, 0x97])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x20, 0x97])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_2_samples_128_samples(self):
         self.ina.configure(
             self.ina.RANGE_32V, self.ina.GAIN_1_40MV,
             self.ina.ADC_2SAMP, self.ina.ADC_128SAMP)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x24, 0xff])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x24, 0xff])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_4_samples_8_samples(self):
         self.ina.configure(
             self.ina.RANGE_32V, self.ina.GAIN_1_40MV,
             self.ina.ADC_4SAMP, self.ina.ADC_8SAMP)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x25, 0x5f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x25, 0x5f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_8_samples_16_samples(self):
         self.ina.configure(
             self.ina.RANGE_32V, self.ina.GAIN_1_40MV,
             self.ina.ADC_8SAMP, self.ina.ADC_16SAMP)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x25, 0xe7])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x25, 0xe7])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_32_samples_64_samples(self):
         self.ina.configure(
             self.ina.RANGE_32V, self.ina.GAIN_1_40MV,
             self.ina.ADC_32SAMP, self.ina.ADC_64SAMP)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x26, 0xf7])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x26, 0xf7])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_invalid_voltage_range(self):
@@ -132,15 +132,9 @@ class TestConfiguration(unittest.TestCase):
         with self.assertRaisesRegexp(ValueError, "Expected current"):
             ina.configure(ina.RANGE_32V, ina.GAIN_1_40MV)
 
-    def test_overflow_not_operative(self):
-        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x01, 0x9f])]
-        self.ina._i2c.writeList.assert_has_calls(calls)
-        self.assertFalse(self.ina._overflow_operative)
-
     def test_overflow_operative(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x09, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
         self.assertTrue(self.ina._overflow_operative)
 
@@ -192,10 +186,10 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.readU16BE = Mock(return_value=0)
         self.assertEqual(self.ina.voltage(), 0)
 
-    def test_read_20ua(self):
+    def test_read_12ua(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         self.ina._i2c.readS16BE = Mock(return_value=1)
-        self.assertEqual(self.ina.current(), 0.02)
+        self.assertAlmostEqual(self.ina.current(), 0.012, 3)
 
     def test_read_0ma(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
@@ -205,7 +199,7 @@ class TestRead(unittest.TestCase):
     def test_read_negative_ma(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         self.ina._i2c.readS16BE = Mock(return_value=-19795)
-        self.assertAlmostEqual(self.ina.current(), -395.9, 2)
+        self.assertAlmostEqual(self.ina.current(), -236.9, 1)
 
     def test_read_0mw(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
@@ -214,8 +208,8 @@ class TestRead(unittest.TestCase):
 
     def test_read_1914mw(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        self.ina._i2c.readU16BE = Mock(return_value=4785)
-        self.assertAlmostEqual(self.ina.power(), 1914.0, 2)
+        self.ina._i2c.readU16BE = Mock(return_value=7997)
+        self.assertAlmostEqual(self.ina.power(), 1914.0, 0)
 
     def test_read_shunt_20mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
@@ -232,12 +226,6 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.readS16BE = Mock(return_value=-4000)
         self.assertEqual(self.ina.shunt_voltage(), -40.0)
 
-    def test_current_overflow_invalid(self):
-        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        with self.assertRaisesRegexp(
-                RuntimeError, "Current overflows cannot be detected"):
-            self.ina.current_overflow()
-
     def test_current_overflow_valid(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
         self.ina._i2c.readU16BE = Mock(return_value=4001)
@@ -246,13 +234,18 @@ class TestRead(unittest.TestCase):
 
     def test_auto_gain(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
-        self.ina._i2c.readU16BE = Mock()
-        self.ina._i2c.readU16BE.side_effect = lambda x: {0x02: 4001, 0x00: 10655}[x]
+
+        self.ina._read_voltage_register = Mock()
+        self.ina._read_voltage_register.side_effect = [4001, 4000]
+        self.ina._read_configuration = Mock()
+        self.ina._read_configuration.side_effect = [2463, 2463]
+        self.ina._current_register = Mock(return_value=100)
 
         self.ina.voltage()
-        self.ina.current()
+        self.assertAlmostEqual(self.ina.current(), 4.787, 3)
 
-        calls = [call(0x05, [0x50, 0x00]), call(0x00, [0x20, 0x07])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f]),
+                 call(0x05, [0x21, 0x6c]), call(0x00, [0x11, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
 
