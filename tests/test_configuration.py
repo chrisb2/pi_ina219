@@ -25,7 +25,9 @@ class TestConfiguration(unittest.TestCase):
         calls = [call(0x05, [0x42, 0xd8]), call(0x00, [0x09, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
-    def test_auto_gain_no_expected_amps(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_auto_gain_no_expected_amps(self, device):
+        device.return_value = Mock()
         self.ina = INA219(0.1)
         self.ina._i2c.writeList = Mock()
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
@@ -34,7 +36,9 @@ class TestConfiguration(unittest.TestCase):
         calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x01, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
-    def test_manual_gain_no_expected_amps(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_manual_gain_no_expected_amps(self, device):
+        device.return_value = Mock()
         self.ina = INA219(0.1)
         self.ina._i2c.writeList = Mock()
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)

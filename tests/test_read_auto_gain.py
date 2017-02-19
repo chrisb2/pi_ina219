@@ -14,10 +14,8 @@ class TestReadAutoGain(unittest.TestCase):
     GAIN_RANGE_MSG = 'Current out of device range \(overflow\)'
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
-    def setUp(self, device):
+    def test_auto_gain(self, device):
         device.return_value = Mock()
-
-    def test_auto_gain(self):
         self.ina = INA219(0.1, 0.4)
         self.ina._i2c.writeList = Mock()
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
@@ -35,7 +33,9 @@ class TestReadAutoGain(unittest.TestCase):
                  call(0x05, [0x21, 0x6c]), call(0x00, [0x11, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
-    def test_auto_gain_out_of_range(self):
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_auto_gain_out_of_range(self, device):
+        device.return_value = Mock()
         self.ina = INA219(0.1, 3.0)
         self.ina._i2c.writeList = Mock()
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
