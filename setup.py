@@ -8,18 +8,19 @@ except ImportError:
 
 from setuptools import setup
 
-import sys
+DESC = ('Library that supports the INA219 current and '
+        'power monitor from Texas Instruments.')
 
 # Define required packages.
 requires = ['Adafruit_GPIO', 'mock']
 
-setup(name              = 'pi-ina219',
-      version           = '1.1.0',
-      author            = 'Chris Borrill',
-      author_email      = 'chris.borrill@gmail.com',
-      description       = 'Library that supports the INA219 current and power monitor from Texas Instruments.',
-      license          = 'MIT',
-      url               = 'https://github.com/chrisb/pi_ina219/',
-      install_requires  = requires,
-      test_suite        = 'tests',
-      py_modules        = ['ina219'])
+setup(name='pi-ina219',
+      version='1.1.0',
+      author='Chris Borrill',
+      author_email='chris.borrill@gmail.com',
+      description=DESC,
+      license='MIT',
+      url='https://github.com/chrisb/pi_ina219/',
+      install_requires=requires,
+      test_suite='tests',
+      py_modules=['ina219'])
