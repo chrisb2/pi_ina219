@@ -248,11 +248,13 @@ class INA219:
                                  (max_expected_amps, max_possible_amps))
             logging.info("max expected current: %.3fA" %
                          max_expected_amps)
-
-        if max_expected_amps < max_possible_amps:
-            self._current_lsb = max_expected_amps / self.__CURRENT_LSB_FACTOR
+            if max_expected_amps < max_possible_amps:
+                self._current_lsb = max_expected_amps / self.__CURRENT_LSB_FACTOR
+            else:
+                self._current_lsb = max_possible_amps / self.__CURRENT_LSB_FACTOR
         else:
             self._current_lsb = max_possible_amps / self.__CURRENT_LSB_FACTOR
+            
 
         if self._current_lsb < self._min_supported_lsb:
             self._current_lsb = self._min_supported_lsb
