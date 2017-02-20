@@ -119,7 +119,7 @@ if __name__ == "__main__":
 In this mode by understanding the maximum current expected in your system
 and specifying this and the gain in the script you can always achieve the 
 best possible current and power resolution, at the price of missing current
-and power values if a current over flow occurs.
+and power values if a current overflow occurs.
 
 ```python
 #!/usr/bin/env python
@@ -158,7 +158,7 @@ ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS, address=0x41)
 The sensor may be put in low power mode between reads as follows:
 
 ```python
-ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
+ina.configure(ina.RANGE_16V)
 while True:
     print "Voltage : %.3f V" % ina.voltage()
     ina.sleep()
