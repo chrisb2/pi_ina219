@@ -21,15 +21,15 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
 
         self.ina._read_voltage_register = Mock()
-        self.ina._read_voltage_register.side_effect = [4001, 4000]
+        self.ina._read_voltage_register.side_effect = [0xfa1, 0xfa0]
         self.ina._read_configuration = Mock()
-        self.ina._read_configuration.side_effect = [2463, 2463]
+        self.ina._read_configuration.side_effect = [0x99f, 0x99f]
         self.ina._current_register = Mock(return_value=100)
 
         self.ina.voltage()
         self.assertAlmostEqual(self.ina.current(), 4.787, 3)
 
-        calls = [call(0x05, [0x42, 0xd8]), call(0x00, [0x09, 0x9f]),
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f]),
                  call(0x05, [0x21, 0x6c]), call(0x00, [0x11, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
@@ -40,8 +40,8 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina._i2c.writeList = Mock()
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
 
-        self.ina._read_voltage_register = Mock(return_value=4001)
-        self.ina._read_configuration = Mock(return_value=6559)
+        self.ina._read_voltage_register = Mock(return_value=0xfa1)
+        self.ina._read_configuration = Mock(return_value=0x199f)
 
         self.ina.voltage()
         with self.assertRaisesRegexp(RuntimeError, self.GAIN_RANGE_MSG):

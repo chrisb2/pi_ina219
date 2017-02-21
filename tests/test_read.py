@@ -18,19 +18,19 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.writeList = Mock()
 
     def test_read_32v(self):
-        self.ina._i2c.readU16BE = Mock(return_value=64000)
+        self.ina._i2c.readU16BE = Mock(return_value=0xfa00)
         self.assertEqual(self.ina.voltage(), 32)
 
     def test_read_16v(self):
-        self.ina._i2c.readU16BE = Mock(return_value=32000)
+        self.ina._i2c.readU16BE = Mock(return_value=0x7d00)
         self.assertEqual(self.ina.voltage(), 16)
 
     def test_read_4_808v(self):
-        self.ina._i2c.readU16BE = Mock(return_value=9618)
+        self.ina._i2c.readU16BE = Mock(return_value=0x2592)
         self.assertEqual(self.ina.voltage(), 4.808)
 
     def test_read_4mv(self):
-        self.ina._i2c.readU16BE = Mock(return_value=8)
+        self.ina._i2c.readU16BE = Mock(return_value=0x8)
         self.assertEqual(self.ina.voltage(), 0.004)
 
     def test_read_supply_voltage(self):
@@ -44,7 +44,7 @@ class TestRead(unittest.TestCase):
 
     def test_read_12ua(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        self.ina._i2c.readS16BE = Mock(return_value=1)
+        self.ina._i2c.readS16BE = Mock(return_value=0x1)
         self.assertAlmostEqual(self.ina.current(), 0.012, 3)
 
     def test_read_0ma(self):
@@ -54,7 +54,7 @@ class TestRead(unittest.TestCase):
 
     def test_read_negative_ma(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        self.ina._i2c.readS16BE = Mock(return_value=-19795)
+        self.ina._i2c.readS16BE = Mock(return_value=-0x4d52)
         self.assertAlmostEqual(self.ina.current(), -236.9, 1)
 
     def test_read_0mw(self):
@@ -64,12 +64,12 @@ class TestRead(unittest.TestCase):
 
     def test_read_1914mw(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        self.ina._i2c.readU16BE = Mock(return_value=7997)
+        self.ina._i2c.readU16BE = Mock(return_value=0x1f3d)
         self.assertAlmostEqual(self.ina.power(), 1914.0, 0)
 
     def test_read_shunt_20mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        self.ina._i2c.readS16BE = Mock(return_value=2000)
+        self.ina._i2c.readS16BE = Mock(return_value=0x7d0)
         self.assertEqual(self.ina.shunt_voltage(), 20.0)
 
     def test_read_shunt_0mv(self):
@@ -79,11 +79,11 @@ class TestRead(unittest.TestCase):
 
     def test_read_shunt_negative_40mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
-        self.ina._i2c.readS16BE = Mock(return_value=-4000)
+        self.ina._i2c.readS16BE = Mock(return_value=-0xfa0)
         self.assertEqual(self.ina.shunt_voltage(), -40.0)
 
     def test_current_overflow_valid(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
-        self.ina._i2c.readU16BE = Mock(return_value=4001)
+        self.ina._i2c.readU16BE = Mock(return_value=0xfa1)
         self.assertEqual(self.ina.voltage(), 2.0)
         self.assertTrue(self.ina.current_overflow())

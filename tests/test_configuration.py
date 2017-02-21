@@ -22,7 +22,7 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(self.ina._gain, 1)
         self.assertEqual(self.ina._voltage_range, 0)
         self.assertTrue(self.ina._auto_gain_enabled)
-        calls = [call(0x05, [0x42, 0xd8]), call(0x00, [0x09, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
@@ -67,17 +67,17 @@ class TestConfiguration(unittest.TestCase):
 
     def test_32v_80mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_2_80MV)
-        calls = [call(0x05, [0x42, 0xd8]), call(0x00, [0x29, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x29, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_160mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_4_160MV)
-        calls = [call(0x05, [0x21, 0x6c]), call(0x00, [0x31, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x31, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_320mv(self):
         self.ina.configure(self.ina.RANGE_32V, self.ina.GAIN_8_320MV)
-        calls = [call(0x05, [0x10, 0xb6]), call(0x00, [0x39, 0x9f])]
+        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x39, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_32v_40mv_9bit(self):

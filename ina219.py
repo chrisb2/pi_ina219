@@ -100,7 +100,7 @@ class INA219:
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
         self._current_overflow = 0
-        self._min_supported_lsb = self.__CALIBRATION_FACTOR / \
+        self._min_device_current_lsb = self.__CALIBRATION_FACTOR / \
             (self._shunt_ohms * self.__MAX_CALIBRATION_VALUE)
         self._gain = None
         self._auto_gain_enabled = False
@@ -249,15 +249,16 @@ class INA219:
             logging.info("max expected current: %.3fA" %
                          max_expected_amps)
             if max_expected_amps < max_possible_amps:
-                self._current_lsb = max_expected_amps / self.__CURRENT_LSB_FACTOR
+                self._current_lsb = \
+                    max_expected_amps / self.__CURRENT_LSB_FACTOR
             else:
-                self._current_lsb = max_possible_amps / self.__CURRENT_LSB_FACTOR
+                self._current_lsb = \
+                    max_possible_amps / self.__CURRENT_LSB_FACTOR
         else:
             self._current_lsb = max_possible_amps / self.__CURRENT_LSB_FACTOR
-            
 
-        if self._current_lsb < self._min_supported_lsb:
-            self._current_lsb = self._min_supported_lsb
+        if self._current_lsb < self._min_device_current_lsb:
+            self._current_lsb = self._min_device_current_lsb
         logging.info("current LSB: %.3e A/bit" % self._current_lsb)
 
         self._power_lsb = self._current_lsb * 20
