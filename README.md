@@ -24,7 +24,7 @@ be minimised.
 The library has been tested with the 
 [Adafruit INA219 Breakout](https://www.adafruit.com/products/904).
 
-## Prerequisites
+## Installation and Upgrade
 
 This library and its dependency 
 ([Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO)) 
@@ -33,6 +33,7 @@ can be installed by executing:
 ```shell
 sudo pip install git+git://github.com/chrisb2/pi_ina219.git
 ```
+To upgrade to a later version simply run the above command again.
 
 The Adafruit library supports the I2C protocol on all versions of the 
 Raspberry Pi. Remember to enable the I2C bus under the *Advanced Options* 

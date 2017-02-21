@@ -61,6 +61,7 @@ class INA219:
     __GAIN_VOLTS = [0.04, 0.08, 0.16, 0.32]
 
     __CONT_SH_BUS = 7
+    __MAX_CALIBRATION_VALUE = 0xFFFE  # Max value supported (65534 decimal)
 
     __LSB_ERR_MSG = ('Calibration error, current lsb %.3e must be '
                      'between min lsb %.3e and max lsb %.3e')
@@ -97,6 +98,8 @@ class INA219:
         self._i2c = I2C.get_i2c_device(address)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
+        self._min_device_current_lsb = 0.04096 / \
+            (self._shunt_ohms * self.__MAX_CALIBRATION_VALUE)
         self._current_overflow = 0
         self._overflow_operative = True
 
@@ -217,6 +220,9 @@ class INA219:
         max_current_lsb = float(max_expected_amps) / 4096
 
         self._current_lsb = self.__select_min_rounded_lsb(min_current_lsb)
+        if self._current_lsb < self._min_device_current_lsb:
+            self._current_lsb = self._min_device_current_lsb
+
         logging.info("min current LSB: %.3e A/bit" % min_current_lsb)
         logging.info("max current LSB: %.3e A/bit" % max_current_lsb)
         logging.info("chosen current LSB: %.3e A/bit" % self._current_lsb)

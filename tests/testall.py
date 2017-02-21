@@ -17,6 +17,7 @@ class TestConstructor(unittest.TestCase):
         self.ina = INA219(0.1, 0.4)
         self.assertEqual(self.ina._shunt_ohms, 0.1)
         self.assertEqual(self.ina._max_expected_amps, 0.4)
+        self.assertAlmostEqual(self.ina._min_device_current_lsb, 6.25e-6, 2)
 
 
 class TestConfiguration(unittest.TestCase):
@@ -38,6 +39,14 @@ class TestConfiguration(unittest.TestCase):
         self.ina = INA219(0.1, 4)
         with self.assertRaisesRegexp(ValueError, "Expected amps"):
             self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_AUTO)
+
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_calibration_register_maximum_is_fffe(self, device):
+        device.return_value = Mock()
+        self.ina = INA219(0.1, 0.1)
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        calls = [call(0x05, [0xFF, 0xFE]), call(0x00, [0x01, 0x9f])]
+        self.ina._i2c.writeList.assert_has_calls(calls)
 
     def test_16v_40mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)

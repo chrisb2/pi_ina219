@@ -15,7 +15,7 @@ DESC = ('Library that supports the INA219 current and '
 requires = ['Adafruit_GPIO', 'mock']
 
 setup(name='pi-ina219',
-      version='1.0.2',
+      version='1.0.3',
       author='Chris Borrill',
       author_email='chris.borrill@gmail.com',
       description=DESC,
