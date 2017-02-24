@@ -20,6 +20,7 @@ class TestConstructor(unittest.TestCase):
         self.assertEqual(self.ina._current_overflow, 0)
         self.assertIsNone(self.ina._gain)
         self.assertFalse(self.ina._auto_gain_enabled)
+        self.assertAlmostEqual(self.ina._min_device_current_lsb, 6.25e-6, 2)
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def test_with_max_expected_amps(self, device):
