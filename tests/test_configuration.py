@@ -18,9 +18,25 @@ class TestConfiguration(unittest.TestCase):
         self.ina._i2c.writeList = Mock()
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
-    def test_calibration_register_maximum_is_fffe(self, device):
+    def test_calibration_register_maximum_is_fffe_1_ohm(self, device):
+        device.return_value = Mock()
+        self.ina = INA219(1.0, 0.01)
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        calls = [call(0x05, [0xFF, 0xFE]), call(0x00, [0x01, 0x9f])]
+        self.ina._i2c.writeList.assert_has_calls(calls)
+
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_calibration_register_maximum_is_fffe_100_mohm(self, device):
         device.return_value = Mock()
         self.ina = INA219(0.1, 0.1)
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        calls = [call(0x05, [0xFF, 0xFE]), call(0x00, [0x01, 0x9f])]
+        self.ina._i2c.writeList.assert_has_calls(calls)
+
+    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    def test_calibration_register_maximum_is_fffe_10_mohm(self, device):
+        device.return_value = Mock()
+        self.ina = INA219(0.01, 0.1)
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         calls = [call(0x05, [0xFF, 0xFE]), call(0x00, [0x01, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)

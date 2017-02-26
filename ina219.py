@@ -55,6 +55,7 @@ class INA219:
     __MODE1 = 0
 
     __OVF = 1
+    __CNVR = 2
 
     __BUS_RANGE = [16, 32]
     __GAIN_VOLTS = [0.04, 0.08, 0.16, 0.32]
@@ -66,7 +67,8 @@ class INA219:
                      'than max possible current %.3fA')
     __RNG_ERR_MSG = ('Expected amps %.2fA, out of range, use a lower '
                      'value shunt resistor')
-    __DEV_RNG_ERR = ('Current out of device range (overflow)')
+    __DEV_RNG_ERR = ('Current out of device range (overflow)'
+                     ' - maximum gain %.2fV reached')
     __VOLT_ERR_MSG = ('Invalid voltage range, must be one of: '
                       'RANGE_16V, RANGE_32V')
 
@@ -76,12 +78,14 @@ class INA219:
                    'bus ADC: %d, shunt ADC: %d')
     __LOG_MSG_2 = ('calibrate called with: bus max volts: %dV, '
                    'max shunt volts: %.2fV%s')
+    __LOG_MSG_3 = ('Current overflow detect - '
+                   'attempting to increase gain')
 
     __SHUNT_MILLIVOLTS_LSB = 0.01  # 10uV
     __BUS_MILLIVOLTS_LSB = 4  # 4mV
-    __CURRENT_LSB_FACTOR = 33422
     __CALIBRATION_FACTOR = 0.04096
     __MAX_CALIBRATION_VALUE = 0xFFFE  # Max value support (65534 decimal)
+    __CURRENT_LSB_FACTOR = 33422  # 102% of 32767
 
     def __init__(self, shunt_ohms, max_expected_amps=None, address=__ADDRESS,
                  log_level=logging.ERROR):
@@ -100,11 +104,8 @@ class INA219:
         self._i2c = I2C.get_i2c_device(address)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
-        self._min_device_current_lsb = 0.04096 / \
-            (self._shunt_ohms * self.__MAX_CALIBRATION_VALUE)
         self._current_overflow = 0
-        self._min_device_current_lsb = self.__CALIBRATION_FACTOR / \
-            (self._shunt_ohms * self.__MAX_CALIBRATION_VALUE)
+        self._min_device_current_lsb = self._calculate_min_current_lsb()
         self._gain = None
         self._auto_gain_enabled = False
 
@@ -177,16 +178,10 @@ class INA219:
         """ Returns the bus current in milliamps. """
         if self._auto_gain_enabled:
             while self.current_overflow():
-                gain = self._read_current_gain()
-                if gain < len(self.__GAIN_VOLTS) - 1:
-                    gain = gain + 1
-                    self._calibrate(
-                        self.__BUS_RANGE[self._voltage_range],
-                        self.__GAIN_VOLTS[gain])
-                    self._configure_gain(gain)
-                    self.voltage()
-                else:
-                    raise RuntimeError(self.__DEV_RNG_ERR)
+                logging.info(self.__LOG_MSG_3)
+                self._increase_gain()
+                # Read voltage to update current overflow status
+                self.voltage()
 
         return self._current_register() * self._current_lsb * 1000
 
@@ -226,6 +221,17 @@ class INA219:
             raise ValueError(self.__RNG_ERR_MSG % self._max_expected_amps)
         gain = min(v for v in self.__GAIN_VOLTS if v > shunt_v)
         return self.__GAIN_VOLTS.index(gain)
+
+    def _increase_gain(self):
+        gain = self._read_gain()
+        if gain < len(self.__GAIN_VOLTS) - 1:
+            gain = gain + 1
+            self._calibrate(self.__BUS_RANGE[self._voltage_range],
+                            self.__GAIN_VOLTS[gain])
+            self._configure_gain(gain)
+            # time.sleep(0.01)
+        else:
+            raise RuntimeError(self.__DEV_RNG_ERR % self.__GAIN_VOLTS[gain])
 
     def _configure(self, voltage_range, gain, bus_adc, shunt_adc):
         configuration = (
@@ -286,16 +292,20 @@ class INA219:
     def _read_configuration(self):
         return self.__read_register(self.__REG_CONFIG)
 
-    def _read_current_gain(self):
+    def _calculate_min_current_lsb(self):
+        return self.__CALIBRATION_FACTOR / \
+            (self._shunt_ohms * self.__MAX_CALIBRATION_VALUE)
+
+    def _read_gain(self):
         configuration = self._read_configuration()
         gain = (configuration & 0x1800) >> self.__PG0
-        logging.info("current gain is: %.2fV" % self.__GAIN_VOLTS[gain])
+        logging.info("gain is currently: %.2fV" % self.__GAIN_VOLTS[gain])
         return gain
 
     def _configure_gain(self, gain):
         configuration = self._read_configuration()
         configuration = configuration & 0xE7FF
-        logging.info("set gain to: %.2fV" % self.__GAIN_VOLTS[gain])
+        logging.info("gain set to: %.2fV" % self.__GAIN_VOLTS[gain])
         self._configuration_register(configuration | (gain << self.__PG0))
 
     def _calibration_register(self, register_value):
