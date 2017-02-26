@@ -229,7 +229,9 @@ class INA219:
             self._calibrate(self.__BUS_RANGE[self._voltage_range],
                             self.__GAIN_VOLTS[gain])
             self._configure_gain(gain)
-            # time.sleep(0.01)
+            # 1mS delay required for new configuration to take effect,
+            # otherwise invalid current readings can occur.
+            time.sleep(0.001)
         else:
             raise RuntimeError(self.__DEV_RNG_ERR % self.__GAIN_VOLTS[gain])
 
