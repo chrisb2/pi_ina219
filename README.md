@@ -44,11 +44,11 @@ if you want the voltage on the supply side then you should add the bus
 voltage and shunt voltage together, or use the *supply_voltage()* 
 function.
 
-### Simple - Auto Gain Mode
+### Simple - Auto Gain
 
 This mode is great for getting started, as it will provide valid readings 
 until the device current capability is exceeded for the value of the 
-shunt resistor connected (3.2A for 0.1&Omega; resistor). It does this by
+shunt resistor connected (3.2A for 0.1&Omega; shunt resistor). It does this by
 automatically adjusting the gain as required until the maximum is reached,
 when an exception is thrown to avoid invalid readings being taken.
 
@@ -75,11 +75,12 @@ def read():
 		# Current out of device range with specified shunt resister
 		print e.strerror
 
+
 if __name__ == "__main__":
     read()
 ```
 
-### Advance - Auto Gain Mode, High Resolution
+### Advance - Auto Gain, High Resolution
 
 In this mode by understanding the maximum current expected in your system
 and specifying this in the script you can achieve the best possible current
@@ -114,6 +115,7 @@ def read():
 		# Current out of device range with specified shunt resister
 		print e.strerror
 
+
 if __name__ == "__main__":
     read()
 ```
@@ -144,6 +146,7 @@ def read():
 		print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
 	else:
 		print "Current overflow"
+
 
 if __name__ == "__main__":
     read()
@@ -241,8 +244,8 @@ voltage in a loop, a read occurred approximately every 10 milliSeconds.
 
 ## Debugging
 
-To understand the calibration calculation results, informational output
-can be enabled with:
+To understand the calibration calculation results and automatic gain
+increases, informational output can be enabled with:
 
 ```python
     ina = INA219(SHUNT_OHMS, log_level=logging.INFO)
