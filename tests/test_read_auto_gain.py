@@ -3,6 +3,7 @@ import logging
 import unittest
 from mock import Mock, call, patch
 from ina219 import INA219
+from ina219 import DeviceRangeError
 
 logger = logging.getLogger()
 logger.level = logging.ERROR
@@ -44,5 +45,5 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina._read_configuration = Mock(return_value=0x199f)
 
         self.ina.voltage()
-        with self.assertRaisesRegexp(RuntimeError, self.GAIN_RANGE_MSG):
+        with self.assertRaisesRegexp(DeviceRangeError, self.GAIN_RANGE_MSG):
             self.ina.current()

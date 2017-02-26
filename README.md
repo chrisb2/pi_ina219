@@ -58,6 +58,7 @@ The downside of this approach is reduced current and power resolution.
 ```python
 #!/usr/bin/env python
 from ina219 import INA219
+from ina219 import DeviceRangeError
 
 SHUNT_OHMS = 0.1
 
@@ -71,7 +72,7 @@ def read():
 		print "Bus Current: %.3f mA" % ina.current()
 		print "Power: %.3f mW" % ina.power()
 		print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
-	except RuntimeError as e:
+	except DeviceRangeError as e:
 		# Current out of device range with specified shunt resister
 		print e.strerror
 
@@ -97,6 +98,7 @@ avoid invalid readings being taken.
 ```python
 #!/usr/bin/env python
 from ina219 import INA219
+from ina219 import DeviceRangeError
 
 SHUNT_OHMS = 0.1
 MAX_EXPECTED_AMPS = 0.2
@@ -111,7 +113,7 @@ def read():
 		print "Bus Current: %.3f mA" % ina.current()
 		print "Power: %.3f mW" % ina.power()
 		print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
-	except RuntimeError as e:
+	except DeviceRangeError as e:
 		# Current out of device range with specified shunt resister
 		print e.strerror
 
@@ -228,7 +230,8 @@ The arguments, which are all optional, are:
 * `voltage()` Returns the bus voltage in volts (V).
 * `supply_voltage()` Returns the bus supply voltage in volts (V). This 
     is the sum of the bus voltage and shunt voltage.
-* `current()` Returns the bus current in milliamps (mA).
+* `current()` Returns the bus current in milliamps (mA). DeviceRangeError 
+    is thrown if auto gain increase would exceed device capability.
 * `power()` Returns the bus power consumption in milliwatts (mW).
 * `shunt_voltage()` Returns the shunt voltage in millivolts (mV).
 * `current_overflow()` Returns 'True' if an overflow has occured. The 
