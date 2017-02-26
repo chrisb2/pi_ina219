@@ -176,14 +176,12 @@ class INA219:
         return self.voltage() + (float(self.shunt_voltage()) / 1000)
 
     def current(self):
-        """ Returns the bus current in milliamps. DeviceRangeError is 
+        """ Returns the bus current in milliamps. DeviceRangeError is
         thrown if auto gain increase would exceed device capability."""
         if self._auto_gain_enabled:
             while self.current_overflow():
                 logging.info(self.__LOG_MSG_3)
                 self._increase_gain()
-                # Read voltage to update current overflow status
-                self.voltage()
 
         return self._current_register() * self._current_lsb * 1000
 
@@ -209,8 +207,9 @@ class INA219:
 
     def current_overflow(self):
         """ Returns true if the sensor has detect current overflow. In
-        this case the current and power values are invalid. You must
-        call the voltage() function before calling this function. """
+        this case the current and power values are invalid."""
+        # Read bus voltage to update current overflow status
+        self._voltage_register()
         return self._current_overflow
 
     def reset(self):

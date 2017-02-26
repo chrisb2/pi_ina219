@@ -69,12 +69,12 @@ def read():
 
     print "Bus Voltage: %.3f V" % ina.voltage()
     try:
-		print "Bus Current: %.3f mA" % ina.current()
-		print "Power: %.3f mW" % ina.power()
-		print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
-	except DeviceRangeError as e:
-		# Current out of device range with specified shunt resister
-		print e.strerror
+        print "Bus Current: %.3f mA" % ina.current()
+        print "Power: %.3f mW" % ina.power()
+        print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
+    except DeviceRangeError as e:
+        # Current out of device range with specified shunt resister
+        print e.strerror
 
 
 if __name__ == "__main__":
@@ -110,12 +110,12 @@ def read():
 
     print "Bus Voltage: %.3f V" % ina.voltage()
     try:
-		print "Bus Current: %.3f mA" % ina.current()
-		print "Power: %.3f mW" % ina.power()
-		print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
-	except DeviceRangeError as e:
-		# Current out of device range with specified shunt resister
-		print e.strerror
+        print "Bus Current: %.3f mA" % ina.current()
+        print "Power: %.3f mW" % ina.power()
+        print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
+    except DeviceRangeError as e:
+        # Current out of device range with specified shunt resister
+        print e.strerror
 
 
 if __name__ == "__main__":
@@ -142,12 +142,12 @@ def read():
     ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
 
     print "Bus Voltage: %.3f V" % ina.voltage()
-    if !ina.current_overflow():
-		print "Bus Current: %.3f mA" % ina.current()
-		print "Power: %.3f mW" % ina.power()
-		print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
-	else:
-		print "Current overflow"
+    if not ina.current_overflow():
+        print "Bus Current: %.3f mA" % ina.current()
+        print "Power: %.3f mW" % ina.power()
+        print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
+    else:
+        print "Current overflow"
 
 
 if __name__ == "__main__":
@@ -234,8 +234,7 @@ The arguments, which are all optional, are:
     is thrown if auto gain increase would exceed device capability.
 * `power()` Returns the bus power consumption in milliwatts (mW).
 * `shunt_voltage()` Returns the shunt voltage in millivolts (mV).
-* `current_overflow()` Returns 'True' if an overflow has occured. The 
-_voltage()_ function must be called first.
+* `current_overflow()` Returns 'True' if an overflow has occured.
 * `sleep()` Put the INA219 into power down mode.
 * `wake()` Wake the INA219 from power down mode.
 * `reset()` Reset the INA219 to its default configuration.

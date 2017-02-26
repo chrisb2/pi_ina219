@@ -27,7 +27,6 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina._read_configuration.side_effect = [0x99f, 0x99f]
         self.ina._current_register = Mock(return_value=100)
 
-        self.ina.voltage()
         self.assertAlmostEqual(self.ina.current(), 4.787, 3)
 
         calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f]),
