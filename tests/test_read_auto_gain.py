@@ -12,7 +12,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 class TestReadAutoGain(unittest.TestCase):
 
-    GAIN_RANGE_MSG = 'Current out of device range \(overflow\)'
+    GAIN_RANGE_MSG = 'Current out of range \(overflow\)'
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def test_auto_gain(self, device):
@@ -43,6 +43,5 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina._read_voltage_register = Mock(return_value=0xfa1)
         self.ina._read_configuration = Mock(return_value=0x199f)
 
-        self.ina.voltage()
         with self.assertRaisesRegexp(DeviceRangeError, self.GAIN_RANGE_MSG):
             self.ina.current()

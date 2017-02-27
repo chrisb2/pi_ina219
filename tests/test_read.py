@@ -3,6 +3,8 @@ import logging
 import unittest
 from mock import Mock, patch
 from ina219 import INA219
+from ina219 import DeviceRangeError
+
 
 logger = logging.getLogger()
 logger.level = logging.ERROR
@@ -10,6 +12,8 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 class TestRead(unittest.TestCase):
+
+    GAIN_RANGE_MSG = 'Current out of range \(overflow\)'
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def setUp(self, device):
@@ -44,16 +48,19 @@ class TestRead(unittest.TestCase):
 
     def test_read_12ua(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=0x1)
         self.assertAlmostEqual(self.ina.current(), 0.012, 3)
 
     def test_read_0ma(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=0)
         self.assertEqual(self.ina.current(), 0)
 
     def test_read_negative_ma(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=-0x4d52)
         self.assertAlmostEqual(self.ina.current(), -236.9, 1)
 
@@ -64,26 +71,35 @@ class TestRead(unittest.TestCase):
 
     def test_read_1914mw(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readU16BE = Mock(return_value=0x1f3d)
         self.assertAlmostEqual(self.ina.power(), 1914.0, 0)
 
     def test_read_shunt_20mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=0x7d0)
         self.assertEqual(self.ina.shunt_voltage(), 20.0)
 
     def test_read_shunt_0mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=0)
         self.assertEqual(self.ina.shunt_voltage(), 0)
 
     def test_read_shunt_negative_40mv(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
+        self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=-0xfa0)
         self.assertEqual(self.ina.shunt_voltage(), -40.0)
 
     def test_current_overflow_valid(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
         self.ina._i2c.readU16BE = Mock(return_value=0xfa1)
-        self.assertEqual(self.ina.voltage(), 2.0)
         self.assertTrue(self.ina.current_overflow())
+
+    def test_current_overflow_error(self):
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
+        self.ina._i2c.readU16BE = Mock(return_value=0xfa1)
+        with self.assertRaisesRegexp(DeviceRangeError, self.GAIN_RANGE_MSG):
+            self.ina.current()

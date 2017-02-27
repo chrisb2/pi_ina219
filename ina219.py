@@ -105,7 +105,6 @@ class INA219:
         self._i2c = I2C.get_i2c_device(address)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
-        self._current_overflow = 0
         self._min_device_current_lsb = self._calculate_min_current_lsb()
         self._gain = None
         self._auto_gain_enabled = False
@@ -178,19 +177,20 @@ class INA219:
     def current(self):
         """ Returns the bus current in milliamps. DeviceRangeError is
         thrown if auto gain increase would exceed device capability."""
-        if self._auto_gain_enabled:
-            while self.current_overflow():
-                logging.info(self.__LOG_MSG_3)
-                self._increase_gain()
-
+        self._handle_current_overflow()
         return self._current_register() * self._current_lsb * 1000
 
     def power(self):
-        """ Returns the bus power consumption in milliwatts. """
+        """ Returns the bus power consumption in milliwatts.
+        DeviceRangeError is thrown if auto gain increase would exceed
+        device capability."""
+        self._handle_current_overflow()
         return self._power_register() * self._power_lsb * 1000
 
     def shunt_voltage(self):
-        """ Returns the shunt voltage in millivolts. """
+        """ Returns the shunt voltage in millivolts. DeviceRangeError is
+        thrown if auto gain increase would exceed device capability."""
+        self._handle_current_overflow()
         return self._shunt_voltage_register() * self.__SHUNT_MILLIVOLTS_LSB
 
     def sleep(self):
@@ -208,13 +208,19 @@ class INA219:
     def current_overflow(self):
         """ Returns true if the sensor has detect current overflow. In
         this case the current and power values are invalid."""
-        # Read bus voltage to update current overflow status
-        self._voltage_register()
-        return self._current_overflow
+        return self._has_current_overflow()
 
     def reset(self):
         """ Reset the INA219 to its default configuration. """
         self._configuration_register(1 << self.__RST)
+
+    def _handle_current_overflow(self):
+        if self._auto_gain_enabled:
+            while self._has_current_overflow():
+                self._increase_gain()
+        else:
+            if self._has_current_overflow():
+                raise DeviceRangeError(self.__GAIN_VOLTS[self._gain])
 
     def _determine_gain(self, max_expected_amps):
         shunt_v = max_expected_amps * self._shunt_ohms
@@ -224,17 +230,18 @@ class INA219:
         return self.__GAIN_VOLTS.index(gain)
 
     def _increase_gain(self):
+        logging.info(self.__LOG_MSG_3)
         gain = self._read_gain()
         if gain < len(self.__GAIN_VOLTS) - 1:
             gain = gain + 1
             self._calibrate(self.__BUS_RANGE[self._voltage_range],
                             self.__GAIN_VOLTS[gain])
             self._configure_gain(gain)
-            # 1mS delay required for new configuration to take effect,
-            # otherwise invalid current readings can occur.
+            # 1ms delay required for new configuration to take effect,
+            # otherwise invalid current/power readings can occur.
             time.sleep(0.001)
         else:
-            raise DeviceRangeError(self.__GAIN_VOLTS[gain])
+            raise DeviceRangeError(self.__GAIN_VOLTS[gain], True)
 
     def _configure(self, voltage_range, gain, bus_adc, shunt_adc):
         configuration = (
@@ -312,15 +319,19 @@ class INA219:
         configuration = self._read_configuration()
         configuration = configuration & 0xE7FF
         self._configuration_register(configuration | (gain << self.__PG0))
+        self._gain = gain
         logging.info("gain set to: %.2fV" % self.__GAIN_VOLTS[gain])
 
     def _calibration_register(self, register_value):
         logging.debug("calibration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CALIBRATION, register_value)
 
+    def _has_current_overflow(self):
+        ovf = self._read_voltage_register() & self.__OVF
+        return (ovf == 1)
+
     def _voltage_register(self):
         register_value = self._read_voltage_register()
-        self._current_overflow = register_value & self.__OVF
         return register_value >> 3
 
     def _read_voltage_register(self):
@@ -373,10 +384,12 @@ class INA219:
 
 class DeviceRangeError(Exception):
 
-    __DEV_RNG_ERR = ('Current out of device range (overflow)'
-                     ' - maximum gain %.2fV reached')
+    __DEV_RNG_ERR = ('Current out of range (overflow), '
+                     'for gain %.2fV')
 
-    def __init__(self, gain_volts):
+    def __init__(self, gain_volts, device_max=False):
         msg = self.__DEV_RNG_ERR % gain_volts
+        if device_max:
+            msg = msg + ', device limit reached'
         super(DeviceRangeError, self).__init__(msg)
         self._gain_volts = gain_volts
