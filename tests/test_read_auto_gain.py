@@ -12,7 +12,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 class TestReadAutoGain(unittest.TestCase):
 
-    GAIN_RANGE_MSG = 'Current out of range \(overflow\)'
+    GAIN_RANGE_MSG = 'Current out of+ range \(overflow\)'
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def test_auto_gain(self, device):
@@ -27,10 +27,10 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina._read_configuration.side_effect = [0x99f, 0x99f]
         self.ina._current_register = Mock(return_value=100)
 
-        self.assertAlmostEqual(self.ina.current(), 4.787, 3)
+        self.assertAlmostEqual(self.ina.current(), 4.878, 3)
 
-        calls = [call(0x05, [0x85, 0xb0]), call(0x00, [0x09, 0x9f]),
-                 call(0x05, [0x21, 0x6c]), call(0x00, [0x11, 0x9f])]
+        calls = [call(0x05, [0x83, 0x33]), call(0x00, [0x09, 0x9f]),
+                 call(0x05, [0x20, 0xcc]), call(0x00, [0x11, 0x9f])]
         self.ina._i2c.writeList.assert_has_calls(calls)
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')

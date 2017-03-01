@@ -81,11 +81,11 @@ class INA219:
     __SHUNT_MILLIVOLTS_LSB = 0.01  # 10uV
     __BUS_MILLIVOLTS_LSB = 4  # 4mV
     __CALIBRATION_FACTOR = 0.04096
-    __MAX_CALIBRATION_VALUE = 0xFFFE  # Max value support (65534 decimal)
+    __MAX_CALIBRATION_VALUE = 0xFFFE  # Max value supported (65534 decimal)
     # In the spec (p17) the current LSB factor for the minimum LSB is
-    # documented as 32767, but a larger value (102% of 32767) is used
-    # here to guarantee that current overflow can always be detected.
-    __CURRENT_LSB_FACTOR = 33422
+    # documented as 32767, but a larger value (100.1% of 32767) is used
+    # to guarantee that current overflow can always be detected.
+    __CURRENT_LSB_FACTOR = 32800
 
     def __init__(self, shunt_ohms, max_expected_amps=None, address=__ADDRESS,
                  log_level=logging.ERROR):
@@ -141,8 +141,6 @@ class INA219:
             if gain == self.GAIN_AUTO:
                 self._auto_gain_enabled = True
                 self._gain = self._determine_gain(self._max_expected_amps)
-                logging.info('gain automatically set to %.2fV' %
-                             self.__GAIN_VOLTS[self._gain])
             else:
                 self._gain = gain
         else:
@@ -151,6 +149,8 @@ class INA219:
             else:
                 self._auto_gain_enabled = True
                 self._gain = self.GAIN_1_40MV
+
+        logging.info('gain set to %.2fV' % self.__GAIN_VOLTS[self._gain])
 
         logging.debug(
             self.__LOG_MSG_1 %
@@ -241,6 +241,7 @@ class INA219:
             # otherwise invalid current/power readings can occur.
             time.sleep(0.001)
         else:
+            logging.info('Device limit reach, gain cannot be increased')
             raise DeviceRangeError(self.__GAIN_VOLTS[gain], True)
 
     def _configure(self, voltage_range, gain, bus_adc, shunt_adc):
@@ -269,11 +270,11 @@ class INA219:
         logging.info("power LSB: %.3e W/bit" % self._power_lsb)
 
         max_current = self._current_lsb * 32767
-        logging.info("max current before overflow: %.3fA" % max_current)
+        logging.info("max current before overflow: %.4fA" % max_current)
 
         max_shunt_voltage = max_current * self._shunt_ohms
-        logging.info("max shunt voltage before overflow: %.3fV" %
-                     max_shunt_voltage)
+        logging.info("max shunt voltage before overflow: %.4fmV" %
+                     (max_shunt_voltage * 1000))
 
         calibration = trunc(self.__CALIBRATION_FACTOR /
                             (self._current_lsb * self._shunt_ohms))
@@ -392,4 +393,5 @@ class DeviceRangeError(Exception):
         if device_max:
             msg = msg + ', device limit reached'
         super(DeviceRangeError, self).__init__(msg)
-        self._gain_volts = gain_volts
+        self.gain_volts = gain_volts
+        self.device_limit_reached = device_max

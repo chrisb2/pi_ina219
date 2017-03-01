@@ -62,7 +62,7 @@ class TestRead(unittest.TestCase):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         self.ina._read_voltage_register = Mock(return_value=0xfa0)
         self.ina._i2c.readS16BE = Mock(return_value=-0x4d52)
-        self.assertAlmostEqual(self.ina.current(), -236.9, 1)
+        self.assertAlmostEqual(self.ina.current(), -241.4, 1)
 
     def test_read_0mw(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
@@ -72,7 +72,7 @@ class TestRead(unittest.TestCase):
     def test_read_1914mw(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_1_40MV)
         self.ina._read_voltage_register = Mock(return_value=0xfa0)
-        self.ina._i2c.readU16BE = Mock(return_value=0x1f3d)
+        self.ina._i2c.readU16BE = Mock(return_value=0x1ea9)
         self.assertAlmostEqual(self.ina.power(), 1914.0, 0)
 
     def test_read_shunt_20mv(self):

@@ -4,13 +4,14 @@
 [![codecov](https://codecov.io/gh/chrisb2/pi_ina219/branch/master/graph/badge.svg)](https://codecov.io/gh/chrisb2/pi_ina219)
 
 This Python library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf) 
-current and power monitor from Texas Instruments.
+voltage, current and power monitor sensor from Texas Instruments. The intent of the library 
+is to make it easy to use the quite complex functionality of this sensor.  
 
 The library currently only supports _continuous_ reads of voltage and 
 power, but not _triggered_ reads.
 
 The library supports the detection of _overflow_ in the current/power 
-calculations which results in meaningless values for current and power.
+calculations which results in meaningless values for these readings.
 
 The low power mode of the INA219 is supported, so if only occasional 
 reads are being made in a battery based system, current consumption can 
@@ -74,7 +75,7 @@ def read():
         print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
     except DeviceRangeError as e:
         # Current out of device range with specified shunt resister
-        print e.strerror
+        print e
 
 
 if __name__ == "__main__":
@@ -115,7 +116,7 @@ def read():
         print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
     except DeviceRangeError as e:
         # Current out of device range with specified shunt resister
-        print e.strerror
+        print e
 
 
 if __name__ == "__main__":
