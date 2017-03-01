@@ -171,25 +171,25 @@ class INA219:
 
     def supply_voltage(self):
         """ Returns the bus supply voltage in volts. This is the sum of
-        the bus voltage and shunt voltage."""
+        the bus voltage and shunt voltage. A DeviceRangeError
+        exception is thrown if current overflow occurs."""
         return self.voltage() + (float(self.shunt_voltage()) / 1000)
 
     def current(self):
-        """ Returns the bus current in milliamps. DeviceRangeError is
-        thrown if auto gain increase would exceed device capability."""
+        """ Returns the bus current in milliamps. A DeviceRangeError
+        exception is thrown if current overflow occurs."""
         self._handle_current_overflow()
         return self._current_register() * self._current_lsb * 1000
 
     def power(self):
         """ Returns the bus power consumption in milliwatts.
-        DeviceRangeError is thrown if auto gain increase would exceed
-        device capability."""
+        A DeviceRangeError exception is thrown if current overflow occurs."""
         self._handle_current_overflow()
         return self._power_register() * self._power_lsb * 1000
 
     def shunt_voltage(self):
-        """ Returns the shunt voltage in millivolts. DeviceRangeError is
-        thrown if auto gain increase would exceed device capability."""
+        """ Returns the shunt voltage in millivolts.
+        A DeviceRangeError exception is thrown if current overflow occurs."""
         self._handle_current_overflow()
         return self._shunt_voltage_register() * self.__SHUNT_MILLIVOLTS_LSB
 
