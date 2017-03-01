@@ -51,7 +51,7 @@ This mode is great for getting started, as it will provide valid readings
 until the device current capability is exceeded for the value of the 
 shunt resistor connected (3.2A for 0.1&Omega; shunt resistor). It does this by
 automatically adjusting the gain as required until the maximum is reached,
-when an exception is thrown to avoid invalid readings being taken.
+when a _DeviceRangeError_ exception is thrown to avoid invalid readings being taken.
 
 The downside of this approach is reduced current and power resolution.
 
@@ -133,6 +133,7 @@ and power values if a current overflow occurs.
 ```python
 #!/usr/bin/env python
 from ina219 import INA219
+from ina219 import DeviceRangeError
 
 SHUNT_OHMS = 0.1
 MAX_EXPECTED_AMPS = 0.2
@@ -143,11 +144,11 @@ def read():
     ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
 
     print "Bus Voltage: %.3f V" % ina.voltage()
-    if not ina.current_overflow():
+    try:
         print "Bus Current: %.3f mA" % ina.current()
         print "Power: %.3f mW" % ina.power()
         print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
-    else:
+    except DeviceRangeError as e:
         print "Current overflow"
 
 
@@ -184,17 +185,18 @@ returned from a read will be the previous value taken before sleeping.
 * `INA219()` constructs the class.
 The arguments, are:
     * shunt_ohms: The value of the shunt resistor in Ohms (mandatory).
-    * max_expected_amps: The maximum expected current in Amps (mandatory).
+    * max_expected_amps: The maximum expected current in Amps (optional).
     * address: The I2C address of the INA219, defaults to *0x40* (optional).
     * log_level: Set to _logging.INFO_ to see the detailed calibration 
     calculations and _logging.DEBUG_ to see register operations (optional).
 * `configure()` configures and calibrates how the INA219 will take measurements.
 The arguments, which are all optional, are:
     * voltage_range: The full scale voltage range, this is either 16V or 32V, 
-    represented by one of the following constants.
+    represented by one of the following constants (optional).
         * RANGE_16V: Range zero to 16 volts
         * RANGE_32V: Range zero to 32 volts (**default**). **Device only supports upto 26V.**
-    * gain: The gain, which controls the maximum range of the shunt voltage, represented by one of the following constants. 
+    * gain: The gain, which controls the maximum range of the shunt voltage, 
+        represented by one of the following constants (optional). 
         * GAIN_1_40MV: Maximum shunt voltage 40mV
         * GAIN_2_80MV: Maximum shunt voltage 80mV
         * GAIN_4_160MV: Maximum shunt voltage 160mV
@@ -202,7 +204,7 @@ The arguments, which are all optional, are:
         * GAIN_AUTO: Automatically calculate the gain (**default**)
     * bus_adc: The bus ADC resolution (9, 10, 11, or 12-bit), or
         set the number of samples used when averaging results, represented by
-        one of the following constants.
+        one of the following constants (optional).
         * ADC_9BIT: 9 bit, conversion time 84us.
         * ADC_10BIT: 10 bit, conversion time 148us.
         * ADC_11BIT: 11 bit, conversion time 276us.
@@ -216,7 +218,7 @@ The arguments, which are all optional, are:
         * ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
     * shunt_adc: The shunt ADC resolution (9, 10, 11, or 12-bit), or
         set the number of samples used when averaging results, represented by
-        one of the following constants.
+        one of the following constants (optional).
         * ADC_9BIT: 9 bit, conversion time 84us.
         * ADC_10BIT: 10 bit, conversion time 148us.
         * ADC_11BIT: 11 bit, conversion time 276us.
@@ -230,12 +232,17 @@ The arguments, which are all optional, are:
         * ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
 * `voltage()` Returns the bus voltage in volts (V).
 * `supply_voltage()` Returns the bus supply voltage in volts (V). This 
-    is the sum of the bus voltage and shunt voltage.
-* `current()` Returns the bus current in milliamps (mA). DeviceRangeError 
-    is thrown if auto gain increase would exceed device capability.
-* `power()` Returns the bus power consumption in milliwatts (mW).
-* `shunt_voltage()` Returns the shunt voltage in millivolts (mV).
-* `current_overflow()` Returns 'True' if an overflow has occured.
+    is the sum of the bus voltage and shunt voltage. A _DeviceRangeError_ 
+    exception is thrown if current overflow occurs.
+* `current()` Returns the bus current in milliamps (mA). 
+	A _DeviceRangeError_ exception is thrown if current overflow occurs.
+* `power()` Returns the bus power consumption in milliwatts (mW). 
+	A _DeviceRangeError_ exception is thrown if current overflow occurs.
+* `shunt_voltage()` Returns the shunt voltage in millivolts (mV). 
+	A _DeviceRangeError_ exception is thrown if current overflow occurs.
+* `current_overflow()` Returns 'True' if an overflow has 
+	occured. Alternatively handle the _DeviceRangeError_ exception
+	as shown in the examples above.
 * `sleep()` Put the INA219 into power down mode.
 * `wake()` Wake the INA219 from power down mode.
 * `reset()` Reset the INA219 to its default configuration.
