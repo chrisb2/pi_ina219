@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/chrisb2/pi_ina219.svg?branch=master)](https://travis-ci.org/chrisb2/pi_ina219)
 [![codecov](https://codecov.io/gh/chrisb2/pi_ina219/branch/master/graph/badge.svg)](https://codecov.io/gh/chrisb2/pi_ina219)
+[![PyPI version](https://badge.fury.io/py/pi-ina219.svg)](https://badge.fury.io/py/pi-ina219)
 
 This Python library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf) 
 voltage, current and power monitor sensor from Texas Instruments. The intent of the library 
