@@ -1,1 +1,6 @@
 *.pyc
+.coverage
+build
+dist
+pi_ina219.egg-info
+

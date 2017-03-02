@@ -11,8 +11,8 @@ install:
 before_script:
    flake8 .
 # command to run tests
-script:
-   - coverage run --branch --source=ina219 -m unittest tests.testall
-   - coverage xml
+script: 
+  - coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
+  - coverage xml
 after_success:
-   - codecov
+  - codecov
