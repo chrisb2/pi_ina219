@@ -75,7 +75,7 @@ class INA219:
                    'bus ADC: %d, shunt ADC: %d')
     __LOG_MSG_2 = ('calibrate called with: bus max volts: %dV, '
                    'max shunt volts: %.2fV%s')
-    __LOG_MSG_3 = ('Current overflow detect - '
+    __LOG_MSG_3 = ('Current overflow detected - '
                    'attempting to increase gain')
 
     __SHUNT_MILLIVOLTS_LSB = 0.01  # 10uV

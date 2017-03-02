@@ -24,12 +24,17 @@ The library has been tested with the
 
 This library and its dependency 
 ([Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO)) 
-can be installed by executing:
+can be installed from PyPI by executing:
 
 ```shell
-sudo pip install git+git://github.com/chrisb2/pi_ina219.git
+sudo pip install pi-ina219
 ```
-To upgrade to a later version simply run the above command again.
+To upgrade from a previous version install direct from Github execute:
+
+```shell
+sudo pip uninstall pi-ina219
+sudo pip install pi-ina219
+```
 
 The Adafruit library supports the I2C protocol on all versions of the 
 Raspberry Pi. Remember to enable the I2C bus under the *Advanced Options* 
