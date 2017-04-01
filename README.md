@@ -30,7 +30,7 @@ can be installed from PyPI by executing:
 ```shell
 sudo pip install pi-ina219
 ```
-To upgrade from a previous version install direct from Github execute:
+To upgrade from a previous version installed direct from Github execute:
 
 ```shell
 sudo pip uninstall pi-ina219
