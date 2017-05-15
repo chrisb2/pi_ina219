@@ -180,7 +180,7 @@ while True:
     print "Voltage : %.3f V" % ina.voltage()
     ina.sleep()
     time.sleep(60)
-    ina.wake();
+    ina.wake()
 ```
 
 Note that if you do not wake the device after sleeping, the value 
