@@ -88,7 +88,7 @@ if __name__ == "__main__":
     read()
 ```
 
-### Advance - Auto Gain, High Resolution
+### Advanced - Auto Gain, High Resolution
 
 In this mode by understanding the maximum current expected in your system
 and specifying this in the script you can achieve the best possible current
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     read()
 ```
 
-### Advance - Manual Gain, High Resolution
+### Advanced - Manual Gain, High Resolution
 
 In this mode by understanding the maximum current expected in your system
 and specifying this and the gain in the script you can always achieve the 
