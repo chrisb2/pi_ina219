@@ -74,14 +74,14 @@ def read():
     ina = INA219(SHUNT_OHMS)
     ina.configure()
 
-    print "Bus Voltage: %.3f V" % ina.voltage()
+    print("Bus Voltage: %.3f V" % ina.voltage())
     try:
-        print "Bus Current: %.3f mA" % ina.current()
-        print "Power: %.3f mW" % ina.power()
-        print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
+        print("Bus Current: %.3f mA" % ina.current())
+        print("Power: %.3f mW" % ina.power())
+        print("Shunt voltage: %.3f mV" % ina.shunt_voltage())
     except DeviceRangeError as e:
         # Current out of device range with specified shunt resister
-        print e
+        print(e)
 
 
 if __name__ == "__main__":
@@ -115,14 +115,14 @@ def read():
     ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS)
     ina.configure(ina.RANGE_16V)
 
-    print "Bus Voltage: %.3f V" % ina.voltage()
+    print("Bus Voltage: %.3f V" % ina.voltage())
     try:
-        print "Bus Current: %.3f mA" % ina.current()
-        print "Power: %.3f mW" % ina.power()
-        print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
+        print("Bus Current: %.3f mA" % ina.current())
+        print("Power: %.3f mW" % ina.power())
+        print("Shunt voltage: %.3f mV" % ina.shunt_voltage())
     except DeviceRangeError as e:
         # Current out of device range with specified shunt resister
-        print e
+        print(e)
 
 
 if __name__ == "__main__":
@@ -149,13 +149,13 @@ def read():
     ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS)
     ina.configure(ina.RANGE_16V, ina.GAIN_1_40MV)
 
-    print "Bus Voltage: %.3f V" % ina.voltage()
+    print("Bus Voltage: %.3f V" % ina.voltage())
     try:
-        print "Bus Current: %.3f mA" % ina.current()
-        print "Power: %.3f mW" % ina.power()
-        print "Shunt voltage: %.3f mV" % ina.shunt_voltage()
+        print("Bus Current: %.3f mA" % ina.current())
+        print("Power: %.3f mW" % ina.power())
+        print("Shunt voltage: %.3f mV" % ina.shunt_voltage())
     except DeviceRangeError as e:
-        print "Current overflow"
+        print("Current overflow")
 
 
 if __name__ == "__main__":
@@ -177,7 +177,7 @@ The sensor may be put in low power mode between reads as follows:
 ```python
 ina.configure(ina.RANGE_16V)
 while True:
-    print "Voltage : %.3f V" % ina.voltage()
+    print("Voltage : %.3f V" % ina.voltage())
     ina.sleep()
     time.sleep(60)
     ina.wake()
