@@ -87,7 +87,8 @@ class INA219:
     # to guarantee that current overflow can always be detected.
     __CURRENT_LSB_FACTOR = 32800
 
-    def __init__(self, shunt_ohms, max_expected_amps=None, busnum=None, address=__ADDRESS,
+    def __init__(self, shunt_ohms, max_expected_amps=None,
+                 busnum=None, address=__ADDRESS,
                  log_level=logging.ERROR):
         """ Construct the class passing in the resistance of the shunt
         resistor and the maximum expected current flowing through it in

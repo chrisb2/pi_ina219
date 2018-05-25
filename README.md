@@ -192,6 +192,7 @@ returned from a read will be the previous value taken before sleeping.
 The arguments, are:
     * shunt_ohms: The value of the shunt resistor in Ohms (mandatory).
     * max_expected_amps: The maximum expected current in Amps (optional).
+    * busnum: The I2C bus number for the device platform, defaults to *auto detects 0 or 1 for Raspberry Pi or Beaglebone Black* (optional).
     * address: The I2C address of the INA219, defaults to *0x40* (optional).
     * log_level: Set to _logging.INFO_ to see the detailed calibration 
     calculations and _logging.DEBUG_ to see register operations (optional).
