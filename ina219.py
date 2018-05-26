@@ -87,7 +87,8 @@ class INA219:
     # to guarantee that current overflow can always be detected.
     __CURRENT_LSB_FACTOR = 32800
 
-    def __init__(self, shunt_ohms, max_expected_amps=None, address=__ADDRESS,
+    def __init__(self, shunt_ohms, max_expected_amps=None,
+                 busnum=None, address=__ADDRESS,
                  log_level=logging.ERROR):
         """ Construct the class passing in the resistance of the shunt
         resistor and the maximum expected current flowing through it in
@@ -102,7 +103,7 @@ class INA219:
             calculations (optional).
         """
         logging.basicConfig(level=log_level, format=self.__LOG_FORMAT)
-        self._i2c = I2C.get_i2c_device(address)
+        self._i2c = I2C.get_i2c_device(address=address, busnum=busnum)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
         self._min_device_current_lsb = self._calculate_min_current_lsb()
