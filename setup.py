@@ -33,7 +33,7 @@ def read_long_description():
 
 
 setup(name='pi-ina219',
-      version='1.1.0',
+      version='1.2.0',
       author='Chris Borrill',
       author_email='chris.borrill@gmail.com',
       description=DESC,
