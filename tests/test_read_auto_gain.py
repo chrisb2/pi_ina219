@@ -12,7 +12,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 class TestReadAutoGain(unittest.TestCase):
 
-    GAIN_RANGE_MSG = "Current out of range \(overflow\)"
+    GAIN_RANGE_MSG = r"Current out of range \(overflow\)"
 
     @patch('Adafruit_GPIO.I2C.get_i2c_device')
     def test_auto_gain(self, device):
