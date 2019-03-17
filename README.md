@@ -46,7 +46,7 @@ of *raspi-config*.
 The address of the sensor unless otherwise specified is the default 
 of _0x40_.
 
-Note that the bus voltage is that on the load side of the shunt resister, 
+Note that the bus voltage is that on the load side of the shunt resistor, 
 if you want the voltage on the supply side then you should add the bus
 voltage and shunt voltage together, or use the *supply_voltage()* 
 function.
@@ -80,7 +80,7 @@ def read():
         print("Power: %.3f mW" % ina.power())
         print("Shunt voltage: %.3f mV" % ina.shunt_voltage())
     except DeviceRangeError as e:
-        # Current out of device range with specified shunt resister
+        # Current out of device range with specified shunt resistor
         print(e)
 
 
@@ -121,7 +121,7 @@ def read():
         print("Power: %.3f mW" % ina.power())
         print("Shunt voltage: %.3f mV" % ina.shunt_voltage())
     except DeviceRangeError as e:
-        # Current out of device range with specified shunt resister
+        # Current out of device range with specified shunt resistor
         print(e)
 
 
@@ -201,7 +201,7 @@ The arguments, which are all optional, are:
     * voltage_range: The full scale voltage range, this is either 16V or 32V, 
     represented by one of the following constants (optional).
         * RANGE_16V: Range zero to 16 volts
-        * RANGE_32V: Range zero to 32 volts (**default**). **Device only supports upto 26V.**
+        * RANGE_32V: Range zero to 32 volts (**default**). **Device only supports up to 26V.**
     * gain: The gain, which controls the maximum range of the shunt voltage, 
         represented by one of the following constants (optional). 
         * GAIN_1_40MV: Maximum shunt voltage 40mV
@@ -257,7 +257,7 @@ The arguments, which are all optional, are:
 ## Performance
 
 On a Raspberry Pi 2 Model B running Raspbian Jesse and reading a 12-bit
-voltage in a loop, a read occurred approximately every 10 milliSeconds.
+voltage in a loop, a read occurred approximately every 10 milliseconds.
 
 ## Debugging
 
