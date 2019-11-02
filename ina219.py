@@ -103,13 +103,10 @@ class INA219:
             calculations (optional).
         """
 
+        if not logging.root.hasHandlers():
+            # Initialize the root logger if it hasn't been done yet
+            logging.basicConfig(level=log_level, format=self.__LOG_FORMAT)
         self.logger = logging.getLogger(__name__)
-        if len(self.logger.handlers) == 0 and len(logging.root.handlers) == 0:
-            # No logging handlers have been set yet so add a standard one...
-            hdlr = logging.StreamHandler()
-            hdlr.setFormatter(logging.Formatter(self.__LOG_FORMAT))
-            hdlr.setLevel(log_level)
-            self.logger.addHandler(hdlr)
         self.logger.setLevel(log_level)
 
         self._i2c = I2C.get_i2c_device(address=address, busnum=busnum)
