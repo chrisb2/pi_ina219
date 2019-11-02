@@ -103,8 +103,8 @@ class INA219:
             calculations (optional).
         """
 
-        if not logging.root.hasHandlers():
-            # Initialize the root logger if it hasn't been done yet
+        if not logging.getLogger().hasHandlers():
+            # Initialize the root logger only if it hasn't been done yet by a parent module
             logging.basicConfig(level=log_level, format=self.__LOG_FORMAT)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
