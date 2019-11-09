@@ -102,7 +102,13 @@ class INA219:
         log_level -- set to logging.DEBUG to see detailed calibration
             calculations (optional).
         """
-        logging.basicConfig(level=log_level, format=self.__LOG_FORMAT)
+
+        if len(logging.getLogger().handlers) == 0:
+            # Initialize the root logger only if it hasn't been done yet by a parent module
+            logging.basicConfig(level=log_level, format=self.__LOG_FORMAT)
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(log_level)
+
         self._i2c = I2C.get_i2c_device(address=address, busnum=busnum)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
@@ -151,9 +157,9 @@ class INA219:
                 self._auto_gain_enabled = True
                 self._gain = self.GAIN_1_40MV
 
-        logging.info('gain set to %.2fV' % self.__GAIN_VOLTS[self._gain])
+        self.logger.info('gain set to %.2fV' % self.__GAIN_VOLTS[self._gain])
 
-        logging.debug(
+        self.logger.debug(
             self.__LOG_MSG_1 %
             (self._shunt_ohms, self.__BUS_RANGE[voltage_range],
              self.__GAIN_VOLTS[self._gain],
@@ -231,7 +237,7 @@ class INA219:
         return self.__GAIN_VOLTS.index(gain)
 
     def _increase_gain(self):
-        logging.info(self.__LOG_MSG_3)
+        self.logger.info(self.__LOG_MSG_3)
         gain = self._read_gain()
         if gain < len(self.__GAIN_VOLTS) - 1:
             gain = gain + 1
@@ -242,7 +248,7 @@ class INA219:
             # otherwise invalid current/power readings can occur.
             time.sleep(0.001)
         else:
-            logging.info('Device limit reach, gain cannot be increased')
+            self.logger.info('Device limit reach, gain cannot be increased')
             raise DeviceRangeError(self.__GAIN_VOLTS[gain], True)
 
     def _configure(self, voltage_range, gain, bus_adc, shunt_adc):
@@ -254,32 +260,32 @@ class INA219:
 
     def _calibrate(self, bus_volts_max, shunt_volts_max,
                    max_expected_amps=None):
-        logging.info(self.__LOG_MSG_2 %
+        self.logger.info(self.__LOG_MSG_2 %
                      (bus_volts_max, shunt_volts_max,
                       self.__max_expected_amps_to_string(max_expected_amps)))
 
         max_possible_amps = shunt_volts_max / self._shunt_ohms
 
-        logging.info("max possible current: %.3fA" %
+        self.logger.info("max possible current: %.3fA" %
                      max_possible_amps)
 
         self._current_lsb = \
             self._determine_current_lsb(max_expected_amps, max_possible_amps)
-        logging.info("current LSB: %.3e A/bit" % self._current_lsb)
+        self.logger.info("current LSB: %.3e A/bit" % self._current_lsb)
 
         self._power_lsb = self._current_lsb * 20
-        logging.info("power LSB: %.3e W/bit" % self._power_lsb)
+        self.logger.info("power LSB: %.3e W/bit" % self._power_lsb)
 
         max_current = self._current_lsb * 32767
-        logging.info("max current before overflow: %.4fA" % max_current)
+        self.logger.info("max current before overflow: %.4fA" % max_current)
 
         max_shunt_voltage = max_current * self._shunt_ohms
-        logging.info("max shunt voltage before overflow: %.4fmV" %
+        self.logger.info("max shunt voltage before overflow: %.4fmV" %
                      (max_shunt_voltage * 1000))
 
         calibration = trunc(self.__CALIBRATION_FACTOR /
                             (self._current_lsb * self._shunt_ohms))
-        logging.info("calibration: 0x%04x (%d)" % (calibration, calibration))
+        self.logger.info("calibration: 0x%04x (%d)" % (calibration, calibration))
         self._calibration_register(calibration)
 
     def _determine_current_lsb(self, max_expected_amps, max_possible_amps):
@@ -287,7 +293,7 @@ class INA219:
             if max_expected_amps > round(max_possible_amps, 3):
                 raise ValueError(self.__AMP_ERR_MSG %
                                  (max_expected_amps, max_possible_amps))
-            logging.info("max expected current: %.3fA" %
+            self.logger.info("max expected current: %.3fA" %
                          max_expected_amps)
             if max_expected_amps < max_possible_amps:
                 current_lsb = max_expected_amps / self.__CURRENT_LSB_FACTOR
@@ -301,7 +307,7 @@ class INA219:
         return current_lsb
 
     def _configuration_register(self, register_value):
-        logging.debug("configuration: 0x%04x" % register_value)
+        self.logger.debug("configuration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CONFIG, register_value)
 
     def _read_configuration(self):
@@ -314,7 +320,7 @@ class INA219:
     def _read_gain(self):
         configuration = self._read_configuration()
         gain = (configuration & 0x1800) >> self.__PG0
-        logging.info("gain is currently: %.2fV" % self.__GAIN_VOLTS[gain])
+        self.logger.info("gain is currently: %.2fV" % self.__GAIN_VOLTS[gain])
         return gain
 
     def _configure_gain(self, gain):
@@ -322,10 +328,10 @@ class INA219:
         configuration = configuration & 0xE7FF
         self._configuration_register(configuration | (gain << self.__PG0))
         self._gain = gain
-        logging.info("gain set to: %.2fV" % self.__GAIN_VOLTS[gain])
+        self.logger.info("gain set to: %.2fV" % self.__GAIN_VOLTS[gain])
 
     def _calibration_register(self, register_value):
-        logging.debug("calibration: 0x%04x" % register_value)
+        self.logger.debug("calibration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CALIBRATION, register_value)
 
     def _has_current_overflow(self):
@@ -354,7 +360,7 @@ class INA219:
 
     def __write_register(self, register, register_value):
         register_bytes = self.__to_bytes(register_value)
-        logging.debug(
+        self.logger.debug(
             "write register 0x%02x: 0x%04x 0b%s" %
             (register, register_value,
              self.__binary_as_string(register_value)))
@@ -365,7 +371,7 @@ class INA219:
             register_value = self._i2c.readS16BE(register)
         else:
             register_value = self._i2c.readU16BE(register)
-        logging.debug(
+        self.logger.debug(
             "read register 0x%02x: 0x%04x 0b%s" %
             (register, register_value,
              self.__binary_as_string(register_value)))
