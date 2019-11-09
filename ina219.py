@@ -1,5 +1,7 @@
-""" This library supports the INA219 current and power monitor
-from Texas Instruments with a Raspberry Pi using the I2C bus."""
+"""Library for the INA219 current and power monitor from Texas Instruments.
+
+Supports the Raspberry Pi using the I2C bus.
+"""
 import logging
 import time
 from math import trunc
@@ -7,6 +9,7 @@ import Adafruit_GPIO.I2C as I2C
 
 
 class INA219:
+    """Class containing the INA219 functionality."""
 
     RANGE_16V = 0  # Range 0-16 volts
     RANGE_32V = 1  # Range 0-32 volts
@@ -90,9 +93,10 @@ class INA219:
     def __init__(self, shunt_ohms, max_expected_amps=None,
                  busnum=None, address=__ADDRESS,
                  log_level=logging.ERROR):
-        """ Construct the class passing in the resistance of the shunt
-        resistor and the maximum expected current flowing through it in
-        your system.
+        """Construct the class.
+
+        Pass in the resistance of the shunt resistor and the maximum expected
+        current flowing through it in your system.
 
         Arguments:
         shunt_ohms -- value of shunt resistor in Ohms (mandatory).
@@ -102,9 +106,9 @@ class INA219:
         log_level -- set to logging.DEBUG to see detailed calibration
             calculations (optional).
         """
-
         if len(logging.getLogger().handlers) == 0:
-            # Initialize the root logger only if it hasn't been done yet by a parent module
+            # Initialize the root logger only if it hasn't been done yet by a
+            # parent module.
             logging.basicConfig(level=log_level, format=self.__LOG_FORMAT)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
@@ -118,7 +122,7 @@ class INA219:
 
     def configure(self, voltage_range=RANGE_32V, gain=GAIN_AUTO,
                   bus_adc=ADC_12BIT, shunt_adc=ADC_12BIT):
-        """ Configures and calibrates how the INA219 will take measurements.
+        """Configure and calibrate how the INA219 will take measurements.
 
         Arguments:
         voltage_range -- The full scale voltage range, this is either 16V
@@ -172,53 +176,63 @@ class INA219:
         self._configure(voltage_range, self._gain, bus_adc, shunt_adc)
 
     def voltage(self):
-        """ Returns the bus voltage in volts. """
+        """Return the bus voltage in volts."""
         value = self._voltage_register()
         return float(value) * self.__BUS_MILLIVOLTS_LSB / 1000
 
     def supply_voltage(self):
-        """ Returns the bus supply voltage in volts. This is the sum of
-        the bus voltage and shunt voltage. A DeviceRangeError
-        exception is thrown if current overflow occurs."""
+        """Return the bus supply voltage in volts.
+
+        This is the sum of the bus voltage and shunt voltage. A
+        DeviceRangeError exception is thrown if current overflow occurs.
+        """
         return self.voltage() + (float(self.shunt_voltage()) / 1000)
 
     def current(self):
-        """ Returns the bus current in milliamps. A DeviceRangeError
-        exception is thrown if current overflow occurs."""
+        """Return the bus current in milliamps.
+
+        A DeviceRangeError exception is thrown if current overflow occurs.
+        """
         self._handle_current_overflow()
         return self._current_register() * self._current_lsb * 1000
 
     def power(self):
-        """ Returns the bus power consumption in milliwatts.
-        A DeviceRangeError exception is thrown if current overflow occurs."""
+        """Return the bus power consumption in milliwatts.
+
+        A DeviceRangeError exception is thrown if current overflow occurs.
+        """
         self._handle_current_overflow()
         return self._power_register() * self._power_lsb * 1000
 
     def shunt_voltage(self):
-        """ Returns the shunt voltage in millivolts.
-        A DeviceRangeError exception is thrown if current overflow occurs."""
+        """Return the shunt voltage in millivolts.
+
+        A DeviceRangeError exception is thrown if current overflow occurs.
+        """
         self._handle_current_overflow()
         return self._shunt_voltage_register() * self.__SHUNT_MILLIVOLTS_LSB
 
     def sleep(self):
-        """ Put the INA219 into power down mode. """
+        """Put the INA219 into power down mode."""
         configuration = self._read_configuration()
         self._configuration_register(configuration & 0xFFF8)
 
     def wake(self):
-        """ Wake the INA219 from power down mode """
+        """Wake the INA219 from power down mode."""
         configuration = self._read_configuration()
         self._configuration_register(configuration | 0x0007)
         # 40us delay to recover from powerdown (p14 of spec)
         time.sleep(0.00004)
 
     def current_overflow(self):
-        """ Returns true if the sensor has detect current overflow. In
-        this case the current and power values are invalid."""
+        """Return true if the sensor has detect current overflow.
+
+        In this case the current and power values are invalid.
+        """
         return self._has_current_overflow()
 
     def reset(self):
-        """ Reset the INA219 to its default configuration. """
+        """Reset the INA219 to its default configuration."""
         self._configuration_register(1 << self.__RST)
 
     def _handle_current_overflow(self):
@@ -260,14 +274,15 @@ class INA219:
 
     def _calibrate(self, bus_volts_max, shunt_volts_max,
                    max_expected_amps=None):
-        self.logger.info(self.__LOG_MSG_2 %
-                     (bus_volts_max, shunt_volts_max,
-                      self.__max_expected_amps_to_string(max_expected_amps)))
+        self.logger.info(
+            self.__LOG_MSG_2 %
+            (bus_volts_max, shunt_volts_max,
+             self.__max_expected_amps_to_string(max_expected_amps)))
 
         max_possible_amps = shunt_volts_max / self._shunt_ohms
 
         self.logger.info("max possible current: %.3fA" %
-                     max_possible_amps)
+                         max_possible_amps)
 
         self._current_lsb = \
             self._determine_current_lsb(max_expected_amps, max_possible_amps)
@@ -281,11 +296,12 @@ class INA219:
 
         max_shunt_voltage = max_current * self._shunt_ohms
         self.logger.info("max shunt voltage before overflow: %.4fmV" %
-                     (max_shunt_voltage * 1000))
+                         (max_shunt_voltage * 1000))
 
         calibration = trunc(self.__CALIBRATION_FACTOR /
                             (self._current_lsb * self._shunt_ohms))
-        self.logger.info("calibration: 0x%04x (%d)" % (calibration, calibration))
+        self.logger.info(
+            "calibration: 0x%04x (%d)" % (calibration, calibration))
         self._calibration_register(calibration)
 
     def _determine_current_lsb(self, max_expected_amps, max_possible_amps):
@@ -294,7 +310,7 @@ class INA219:
                 raise ValueError(self.__AMP_ERR_MSG %
                                  (max_expected_amps, max_possible_amps))
             self.logger.info("max expected current: %.3fA" %
-                         max_expected_amps)
+                             max_expected_amps)
             if max_expected_amps < max_possible_amps:
                 current_lsb = max_expected_amps / self.__CURRENT_LSB_FACTOR
             else:
@@ -391,11 +407,13 @@ class INA219:
 
 
 class DeviceRangeError(Exception):
+    """Class containing the INA219 error functionality."""
 
     __DEV_RNG_ERR = ('Current out of range (overflow), '
                      'for gain %.2fV')
 
     def __init__(self, gain_volts, device_max=False):
+        """Construct a DeviceRangeError."""
         msg = self.__DEV_RNG_ERR % gain_volts
         if device_max:
             msg = msg + ', device limit reached'
