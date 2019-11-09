@@ -12,12 +12,15 @@ DESC = ('This Python library for Raspberry Pi makes it easy to leverage the '
         'complex functionality of the Texas Instruments INA219 '
         'sensor to measure voltage, current and power.')
 
-classifiers = ['Development Status :: 4 - Beta',
+classifiers = ['Development Status :: 5 - Production/Stable',
                'Operating System :: POSIX :: Linux',
                'License :: OSI Approved :: MIT License',
                'Intended Audience :: Developers',
                'Programming Language :: Python :: 2.7',
                'Programming Language :: Python :: 3.4',
+               'Programming Language :: Python :: 3.5',
+               'Programming Language :: Python :: 3.6',
+               'Programming Language :: Python :: 3.7',
                'Topic :: System :: Hardware :: Hardware Drivers']
 
 # Define required packages.
