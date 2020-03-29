@@ -259,7 +259,9 @@ returned from a read will be the previous value taken before sleeping.
 ## Performance
 
 On a Raspberry Pi 2 Model B running Raspbian Jesse and reading a 12-bit
-voltage in a loop, a read occurred approximately every 10 milliseconds.
+voltage in a loop, a read occurred approximately every 10 milliseconds. 
+
+On a Raspberry Pi 4 running Raspbian Buster a read occurred approximately every 570 microseconds.
 
 ## Debugging
 
