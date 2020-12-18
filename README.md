@@ -255,6 +255,7 @@ returned from a read will be the previous value taken before sleeping.
 - `sleep()` Put the INA219 into power down mode.
 - `wake()` Wake the INA219 from power down mode.
 - `reset()` Reset the INA219 to its default configuration.
+- `is_conversion_ready()` check if conversion was done before reading the next measurement results.
 
 ## Performance
 
