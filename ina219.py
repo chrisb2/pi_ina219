@@ -235,6 +235,10 @@ class INA219:
         """Reset the INA219 to its default configuration."""
         self._configuration_register(1 << self.__RST)
 
+    def is_conversion_ready(self):
+        cnvr = self._read_voltage_register() & self.__CNVR
+        return (cnvr == self.__CNVR)        
+        
     def _handle_current_overflow(self):
         if self._auto_gain_enabled:
             while self._has_current_overflow():
