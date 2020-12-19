@@ -103,3 +103,14 @@ class TestRead(unittest.TestCase):
         self.ina._i2c.readU16BE = Mock(return_value=0xfa1)
         with self.assertRaisesRegexp(DeviceRangeError, self.GAIN_RANGE_MSG):
             self.ina.current()
+
+    def test_new_read_available(self):
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
+        self.ina._i2c.readU16BE = Mock(return_value=0xA)
+        self.assertTrue(self.ina.is_conversion_ready())
+
+    def test_new_read_not_available(self):
+        self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
+        self.ina._i2c.readU16BE = Mock(return_value=0x8)
+        self.assertFalse(self.ina.is_conversion_ready())
+
