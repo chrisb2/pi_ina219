@@ -113,4 +113,3 @@ class TestRead(unittest.TestCase):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
         self.ina._i2c.readU16BE = Mock(return_value=0x8)
         self.assertFalse(self.ina.is_conversion_ready())
-
