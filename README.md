@@ -1,6 +1,6 @@
 # Raspberry Pi Python Library for Voltage and Current Sensors Using the INA219
 
-[![Build Status](https://travis-ci.org/chrisb2/pi_ina219.svg?branch=master)](https://travis-ci.org/chrisb2/pi_ina219)
+[![Build Status](https://travis-ci.com/chrisb2/pi_ina219.svg?branch=master)](https://travis-ci.com/chrisb2/pi_ina219)
 
 [![codecov](https://codecov.io/gh/chrisb2/pi_ina219/branch/master/graph/badge.svg)](https://codecov.io/gh/chrisb2/pi_ina219)
 
