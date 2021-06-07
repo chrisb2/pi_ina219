@@ -33,8 +33,12 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 .
-    - name: Test with codecov
+    - name: Test with Codecov
       run: |
         coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
         coverage xml
+    - name: Upload coverage reports to Codecov
+      run: |
         codecov
+      env: # Or as an environment variable
+        super_secret: ${{ secrets.CODECOV_TOKEN }}

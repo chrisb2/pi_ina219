@@ -1,14 +1,13 @@
 # Raspberry Pi Python Library for Voltage and Current Sensors Using the INA219
 
-[![Build Status](https://travis-ci.com/chrisb2/pi_ina219.svg?branch=master)](https://travis-ci.com/chrisb2/pi_ina219)
+[![Build](https://github.com/chrisb2/pi_ina219/actions/workflows/python-package.yml/badge.svg)](https://github.com/chrisb2/pi_ina219/actions/workflows/python-package.yml)
 
 [![codecov](https://codecov.io/gh/chrisb2/pi_ina219/branch/master/graph/badge.svg)](https://codecov.io/gh/chrisb2/pi_ina219)
 
 [![PyPI version](https://badge.fury.io/py/pi-ina219.svg)](https://badge.fury.io/py/pi-ina219)
 
 This Python library supports the [INA219](http://www.ti.com/lit/ds/symlink/ina219.pdf)
-voltage, current and power monitor sensor from Texas Instruments on both
-Python 2 and 3. The intent of the library is to make it easy to use the
+voltage, current and power monitor sensor from Texas Instruments on Python 3. The intent of the library is to make it easy to use the
 quite complex functionality of this sensor.
 
 The library currently only supports _continuous_ reads of voltage and
