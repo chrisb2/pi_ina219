@@ -39,6 +39,6 @@ jobs:
         coverage xml
     - name: Upload coverage reports to Codecov
       run: |
-        codecov
+        codecov(token = "${{ secrets.CODECOV_TOKEN }}")
       env: # Or as an environment variable
         super_secret: ${{ secrets.CODECOV_TOKEN }}
