@@ -55,6 +55,18 @@ if you want the voltage on the supply side then you should add the bus
 voltage and shunt voltage together, or use the _supply_voltage()_
 function.
 
+### I2C Bus number
+
+In most cases this will be determined automatically, however if this fails you will see the exception:
+```
+Could not determine default I2C bus for platform
+```
+In this case just set the bus number in the INA219 constructor, for example:
+```
+ina = INA219(SHUNT_OHMS, busnum=1)
+```
+This is known to be required with Raspberry Pi 4 and the 'Bullseye' (October 2021) Raspberry Pi OS.
+
 ### Simple - Auto Gain
 
 This mode is great for getting started, as it will provide valid readings
@@ -193,52 +205,52 @@ returned from a read will be the previous value taken before sleeping.
 
 - `INA219()` constructs the class.
   The arguments, are:
-  _ shunt_ohms: The value of the shunt resistor in Ohms (mandatory).
-  _ max\*expected_amps: The maximum expected current in Amps (optional).
+  - shunt_ohms: The value of the shunt resistor in Ohms (mandatory).
+  - max_expected_amps: The maximum expected current in Amps (optional).
   - busnum: The I2C bus number for the device platform, defaults to _auto detects 0 or 1 for Raspberry Pi or Beaglebone Black_ (optional).
-  - address: The I2C address of the INA219, defaults to _0x40_ (optional). \* log*level: Set to \_logging.INFO\* to see the detailed calibration
-    calculations and \_logging.DEBUG* to see register operations (optional).
+  - address: The I2C address of the INA219, defaults to _0x40_ (optional).
+  - log_level: Set to _logging.INFO_ to see the detailed calibration calculations and _logging.DEBUG_ to see register operations (optional).
 - `configure()` configures and calibrates how the INA219 will take measurements.
   The arguments, which are all optional, are:
-  _ voltage_range: The full scale voltage range, this is either 16V or 32V,
+  - voltage_range: The full scale voltage range, this is either 16V or 32V,
   represented by one of the following constants (optional).
-  _ RANGE*16V: Range zero to 16 volts
-  * RANGE*32V: Range zero to 32 volts (**default**). **Device only supports up to 26V.**
-
-  * gain: The gain, which controls the maximum range of the shunt voltage,
+    - RANGE_16V: Range zero to 16 volts
+    - RANGE_32V: Range zero to 32 volts (**default**). **Device only supports up to 26V.**
+  - gain: The gain, which controls the maximum range of the shunt voltage,
   represented by one of the following constants (optional).
-  _ GAIN_1_40MV: Maximum shunt voltage 40mV
-  _ GAIN*2_80MV: Maximum shunt voltage 80mV
-  * GAIN*4_160MV: Maximum shunt voltage 160mV
-  * GAIN*8_320MV: Maximum shunt voltage 320mV
-  * GAIN*AUTO: Automatically calculate the gain (**default**)
-  * bus*adc: The bus ADC resolution (9, 10, 11, or 12-bit), or
+    - GAIN_1_40MV: Maximum shunt voltage 40mV
+    - GAIN_2_80MV: Maximum shunt voltage 80mV
+    - GAIN_4_160MV: Maximum shunt voltage 160mV
+    - GAIN_8_320MV: Maximum shunt voltage 320mV
+    - GAIN_AUTO: Automatically calculate the gain (**default**)
+  - bus_adc: The bus ADC resolution (9, 10, 11, or 12-bit), or
   set the number of samples used when averaging results, represented by
   one of the following constants (optional).
-  * ADC*9BIT: 9 bit, conversion time 84us.
-  * ADC*10BIT: 10 bit, conversion time 148us.
-  * ADC*11BIT: 11 bit, conversion time 276us.
-  * ADC*12BIT: 12 bit, conversion time 532us (**default**).
-  * ADC*2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
-  * ADC*4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
-  * ADC*8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
-  * ADC*16SAMP: 16 samples at 12 bit, conversion time 8.51ms
-  * ADC*32SAMP: 32 samples at 12 bit, conversion time 17.02ms.
-  * ADC*64SAMP: 64 samples at 12 bit, conversion time 34.05ms.
-  * ADC*128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
-  * shunt*adc: The shunt ADC resolution (9, 10, 11, or 12-bit), or
+    - ADC_9BIT: 9 bit, conversion time 84us.
+    - ADC_10BIT: 10 bit, conversion time 148us.
+    - ADC_11BIT: 11 bit, conversion time 276us.
+    - ADC_12BIT: 12 bit, conversion time 532us (**default**).
+    * ADC_2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
+    * ADC_4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
+    * ADC_8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
+    * ADC_16SAMP: 16 samples at 12 bit, conversion time 8.51ms
+    * ADC_32SAMP: 32 samples at 12 bit, conversion time 17.02ms.
+    * ADC_64SAMP: 64 samples at 12 bit, conversion time 34.05ms.
+    * ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
+  * shunt_adc: The shunt ADC resolution (9, 10, 11, or 12-bit), or
   set the number of samples used when averaging results, represented by
   one of the following constants (optional).
-  * ADC*9BIT: 9 bit, conversion time 84us.
-  * ADC*10BIT: 10 bit, conversion time 148us.
-  * ADC*11BIT: 11 bit, conversion time 276us.
-  * ADC*12BIT: 12 bit, conversion time 532us (**default**).
-  * ADC*2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
-  * ADC*4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
-  * ADC*8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
-  * ADC*16SAMP: 16 samples at 12 bit, conversion time 8.51ms
-  * ADC*32SAMP: 32 samples at 12 bit, conversion time 17.02ms.
-  * ADC_64SAMP: 64 samples at 12 bit, conversion time 34.05ms. \* ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
+    * ADC_9BIT: 9 bit, conversion time 84us.
+    * ADC_10BIT: 10 bit, conversion time 148us.
+    * ADC_11BIT: 11 bit, conversion time 276us.
+    * ADC_12BIT: 12 bit, conversion time 532us (**default**).
+    * ADC_2SAMP: 2 samples at 12 bit, conversion time 1.06ms.
+    * ADC_4SAMP: 4 samples at 12 bit, conversion time 2.13ms.
+    * ADC_8SAMP: 8 samples at 12 bit, conversion time 4.26ms.
+    * ADC_16SAMP: 16 samples at 12 bit, conversion time 8.51ms
+    * ADC_32SAMP: 32 samples at 12 bit, conversion time 17.02ms.
+    * ADC_64SAMP: 64 samples at 12 bit, conversion time 34.05ms.
+    * ADC_128SAMP: 128 samples at 12 bit, conversion time 68.10ms.
 - `voltage()` Returns the bus voltage in volts (V).
 - `supply_voltage()` Returns the bus supply voltage in volts (V). This
   is the sum of the bus voltage and shunt voltage. A _DeviceRangeError_
@@ -260,7 +272,7 @@ returned from a read will be the previous value taken before sleeping.
 ## Performance
 
 On a Raspberry Pi 2 Model B running Raspbian Jesse and reading a 12-bit
-voltage in a loop, a read occurred approximately every 10 milliseconds. 
+voltage in a loop, a read occurred approximately every 10 milliseconds.
 
 On a Raspberry Pi 4 running Raspbian Buster a read occurred approximately every 570 microseconds.
 
