@@ -8,12 +8,14 @@ python:
 # command to install dependencies
 install:
   - pip install flake8
+  - pip install mypy
   - pip install -r tests/requirements.txt
-# check PEP8 coding standard with flake8
+# check PEP8 coding standard with flake8 and typing with mypy
 before_script:
-   flake8 .
+  - flake8 .
+  - mypy -p ina219 --strict
 # command to run tests
-script: 
+script:
   - coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
   - coverage xml
 after_success:
