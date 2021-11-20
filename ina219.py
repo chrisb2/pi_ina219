@@ -392,6 +392,8 @@ class INA219:
 
     def __read_register(self, register, negative_value_supported=False):
         value = self._i2c.read_word_data(self._address, register) & 0xFFFF
+        # Convert as big endian (see p14 of the spec)
+        value = ((value << 8) & 0xFF00) + (value >> 8)
         if negative_value_supported and value > 32767:
             value -= 65536
         self.logger.debug(
