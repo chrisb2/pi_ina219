@@ -11,7 +11,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 class TestConstructor(unittest.TestCase):
 
-    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    @patch('ina219.SMBus')
     def test_default(self, device):
         device.return_value = Mock()
         self.ina = INA219(0.1)
@@ -21,7 +21,7 @@ class TestConstructor(unittest.TestCase):
         self.assertFalse(self.ina._auto_gain_enabled)
         self.assertAlmostEqual(self.ina._min_device_current_lsb, 6.25e-6, 2)
 
-    @patch('Adafruit_GPIO.I2C.get_i2c_device')
+    @patch('ina219.SMBus')
     def test_with_max_expected_amps(self, device):
         device.return_value = Mock()
         self.ina = INA219(0.1, 0.4)
