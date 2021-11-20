@@ -24,7 +24,7 @@ classifiers = ['Development Status :: 5 - Production/Stable',
                'Topic :: System :: Hardware :: Hardware Drivers']
 
 # Define required packages.
-requires = ['Adafruit_GPIO', 'mock']
+requires = ['smbus2', 'mock']
 
 
 def read_long_description():
@@ -36,7 +36,7 @@ def read_long_description():
 
 
 setup(name='pi-ina219',
-      version='1.4.0',
+      version='1.5.0',
       author='Chris Borrill',
       author_email='chris.borrill@gmail.com',
       description=DESC,

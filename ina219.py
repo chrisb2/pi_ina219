@@ -5,7 +5,7 @@ Supports the Raspberry Pi using the I2C bus.
 import logging
 import time
 from math import trunc
-import Adafruit_GPIO.I2C as I2C
+from smbus2 import SMBus
 
 
 class INA219:
@@ -91,7 +91,7 @@ class INA219:
     __CURRENT_LSB_FACTOR = 32800
 
     def __init__(self, shunt_ohms, max_expected_amps=None,
-                 busnum=None, address=__ADDRESS,
+                 busnum=1, address=__ADDRESS,
                  log_level=logging.ERROR):
         """Construct the class.
 
@@ -101,6 +101,8 @@ class INA219:
         Arguments:
         shunt_ohms -- value of shunt resistor in Ohms (mandatory).
         max_expected_amps -- the maximum expected current in Amps (optional).
+        busnum -- the I2C bus number for the device platform, defaults
+            to 1 (optional)
         address -- the I2C address of the INA219, defaults
             to *0x40* (optional).
         log_level -- set to logging.DEBUG to see detailed calibration
@@ -113,7 +115,8 @@ class INA219:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
 
-        self._i2c = I2C.get_i2c_device(address=address, busnum=busnum)
+        self._address = address
+        self._i2c = SMBus(busnum)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
         self._min_device_current_lsb = self._calculate_min_current_lsb()
@@ -385,18 +388,18 @@ class INA219:
             "write register 0x%02x: 0x%04x 0b%s" %
             (register, register_value,
              self.__binary_as_string(register_value)))
-        self._i2c.writeList(register, register_bytes)
+        self._i2c.write_i2c_block_data(self._address, register, register_bytes)
 
     def __read_register(self, register, negative_value_supported=False):
-        if negative_value_supported:
-            register_value = self._i2c.readS16BE(register)
-        else:
-            register_value = self._i2c.readU16BE(register)
+        value = self._i2c.read_word_data(self._address, register) & 0xFFFF
+        # Convert as big endian (see p14 of the spec)
+        value = ((value << 8) & 0xFF00) + (value >> 8)
+        if negative_value_supported and value > 32767:
+            value -= 65536
         self.logger.debug(
             "read register 0x%02x: 0x%04x 0b%s" %
-            (register, register_value,
-             self.__binary_as_string(register_value)))
-        return register_value
+            (register, value, self.__binary_as_string(value)))
+        return value
 
     def __to_bytes(self, register_value):
         return [(register_value >> 8) & 0xFF, register_value & 0xFF]

@@ -27,8 +27,7 @@ The library has been tested with the
 ## Installation and Upgrade
 
 This library and its dependency
-([Adafruit GPIO library](https://github.com/adafruit/Adafruit_Python_GPIO))
-can be installed from PyPI by executing:
+([smbus2](https://github.com/kplindegaard/smbus2)) can be installed from PyPI by executing:
 
 ```shell
 sudo pip3 install pi-ina219
@@ -41,9 +40,8 @@ sudo pip3 uninstall pi-ina219
 sudo pip3 install pi-ina219
 ```
 
-The Adafruit library supports the I2C protocol on all versions of the
-Raspberry Pi. Remember to enable the I2C bus under the _Advanced Options_
-of _raspi-config_.
+Remember to enable the I2C bus under the _Advanced Options_
+of _raspi-config_ or using the [Raspberry Pi Imager](https://www.raspberrypi.com/news/raspberry-pi-imager-imaging-utility/).
 
 ## Usage
 
@@ -55,17 +53,15 @@ if you want the voltage on the supply side then you should add the bus
 voltage and shunt voltage together, or use the _supply_voltage()_
 function.
 
-### I2C Bus number
+### I2C Bus Number
 
-In most cases this will be determined automatically, however if this fails you will see the exception:
+In all Raspberry Pi versions above 256Mb RPi versions, the bus number is 1 and
+this is the default. In early Pi versions the bus number is 0.
+
+The bus number can be set in the INA219 constructor, for example:
 ```
-Could not determine default I2C bus for platform
+ina = INA219(SHUNT_OHMS, busnum=0)
 ```
-In this case just set the bus number in the INA219 constructor, for example:
-```
-ina = INA219(SHUNT_OHMS, busnum=1)
-```
-This is known to be required with Raspberry Pi 4 and the 'Bullseye' (October 2021) Raspberry Pi OS.
 
 ### Simple - Auto Gain
 
@@ -207,7 +203,7 @@ returned from a read will be the previous value taken before sleeping.
   The arguments, are:
   - shunt_ohms: The value of the shunt resistor in Ohms (mandatory).
   - max_expected_amps: The maximum expected current in Amps (optional).
-  - busnum: The I2C bus number for the device platform, defaults to _auto detects 0 or 1 for Raspberry Pi or Beaglebone Black_ (optional).
+  - busnum: The I2C bus number for the device platform, defaults to _1_ (optional).
   - address: The I2C address of the INA219, defaults to _0x40_ (optional).
   - log_level: Set to _logging.INFO_ to see the detailed calibration calculations and _logging.DEBUG_ to see register operations (optional).
 - `configure()` configures and calibrates how the INA219 will take measurements.
