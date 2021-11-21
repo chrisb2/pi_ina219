@@ -2,10 +2,13 @@
 
 Supports the Raspberry Pi using the I2C bus.
 """
+import abc
+from enum import IntEnum
 import logging
-import time
 from math import trunc
-import Adafruit_GPIO.I2C as I2C
+import struct
+import time
+from typing import cast, List, Optional
 
 
 class INA219:
@@ -32,7 +35,23 @@ class INA219:
     ADC_64SAMP = 14  # 64 samples at 12-bit, conversion time 34.05ms.
     ADC_128SAMP = 15  # 128 samples at 12-bit, conversion time 68.10ms.
 
-    __ADDRESS = 0x40
+    I2C_ADDR_DEFAULT = 0x40
+
+    class I2cAddrAx(IntEnum):
+        """Configuration values for INA219 pins A0 and A1."""
+        GND = 0b00
+        VSP = 0b01
+        SDA = 0b10
+        SCL = 0b11
+
+    @staticmethod
+    def i2c_addr(a0: I2cAddrAx = I2cAddrAx.GND,
+                 a1: I2cAddrAx = I2cAddrAx.GND) -> int:
+        """Create an I2C address from INA219 pins A0 and A1 configurations.
+
+        See "8.5.5.1 Serial Bus Address" from the datasheet.
+        """
+        return 0x40 + (a1.value << 2) + a0.value
 
     __REG_CONFIG = 0x00
     __REG_SHUNTVOLTAGE = 0x01
@@ -90,22 +109,24 @@ class INA219:
     # to guarantee that current overflow can always be detected.
     __CURRENT_LSB_FACTOR = 32800
 
-    def __init__(self, shunt_ohms, max_expected_amps=None,
-                 busnum=None, address=__ADDRESS,
-                 log_level=logging.ERROR):
+    def __init__(self, i2c_device: 'I2cDevice', shunt_ohms: float,
+                 max_expected_amps: Optional[float] = None,
+                 log_level: int = logging.ERROR) -> None:
         """Construct the class.
 
         Pass in the resistance of the shunt resistor and the maximum expected
         current flowing through it in your system.
 
         Arguments:
+        i2c_device -- the I2C driver to be used for I2C communication
         shunt_ohms -- value of shunt resistor in Ohms (mandatory).
         max_expected_amps -- the maximum expected current in Amps (optional).
-        address -- the I2C address of the INA219, defaults
-            to *0x40* (optional).
         log_level -- set to logging.DEBUG to see detailed calibration
             calculations (optional).
         """
+        assert isinstance(i2c_device, I2cDevice), \
+            'I2C device class must be a subclass of I2cDevice'
+
         if len(logging.getLogger().handlers) == 0:
             # Initialize the root logger only if it hasn't been done yet by a
             # parent module.
@@ -113,15 +134,16 @@ class INA219:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
 
-        self._i2c = I2C.get_i2c_device(address=address, busnum=busnum)
+        self._i2c = i2c_device
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
         self._min_device_current_lsb = self._calculate_min_current_lsb()
-        self._gain = None
+        self._gain: Optional[int] = None
         self._auto_gain_enabled = False
 
-    def configure(self, voltage_range=RANGE_32V, gain=GAIN_AUTO,
-                  bus_adc=ADC_12BIT, shunt_adc=ADC_12BIT):
+    def configure(self, voltage_range: int = RANGE_32V, gain: int = GAIN_AUTO,
+                  bus_adc: int = ADC_12BIT,
+                  shunt_adc: int = ADC_12BIT) -> None:
         """Configure and calibrate how the INA219 will take measurements.
 
         Arguments:
@@ -175,12 +197,12 @@ class INA219:
             self._max_expected_amps)
         self._configure(voltage_range, self._gain, bus_adc, shunt_adc)
 
-    def voltage(self):
+    def voltage(self) -> float:
         """Return the bus voltage in volts."""
         value = self._voltage_register()
         return float(value) * self.__BUS_MILLIVOLTS_LSB / 1000
 
-    def supply_voltage(self):
+    def supply_voltage(self) -> float:
         """Return the bus supply voltage in volts.
 
         This is the sum of the bus voltage and shunt voltage. A
@@ -188,7 +210,7 @@ class INA219:
         """
         return self.voltage() + (float(self.shunt_voltage()) / 1000)
 
-    def current(self):
+    def current(self) -> float:
         """Return the bus current in milliamps.
 
         A DeviceRangeError exception is thrown if current overflow occurs.
@@ -196,7 +218,7 @@ class INA219:
         self._handle_current_overflow()
         return self._current_register() * self._current_lsb * 1000
 
-    def power(self):
+    def power(self) -> float:
         """Return the bus power consumption in milliwatts.
 
         A DeviceRangeError exception is thrown if current overflow occurs.
@@ -204,7 +226,7 @@ class INA219:
         self._handle_current_overflow()
         return self._power_register() * self._power_lsb * 1000
 
-    def shunt_voltage(self):
+    def shunt_voltage(self) -> float:
         """Return the shunt voltage in millivolts.
 
         A DeviceRangeError exception is thrown if current overflow occurs.
@@ -212,50 +234,51 @@ class INA219:
         self._handle_current_overflow()
         return self._shunt_voltage_register() * self.__SHUNT_MILLIVOLTS_LSB
 
-    def sleep(self):
+    def sleep(self) -> None:
         """Put the INA219 into power down mode."""
         configuration = self._read_configuration()
         self._configuration_register(configuration & 0xFFF8)
 
-    def wake(self):
+    def wake(self) -> None:
         """Wake the INA219 from power down mode."""
         configuration = self._read_configuration()
         self._configuration_register(configuration | 0x0007)
         # 40us delay to recover from powerdown (p14 of spec)
         time.sleep(0.00004)
 
-    def current_overflow(self):
+    def current_overflow(self) -> bool:
         """Return true if the sensor has detect current overflow.
 
         In this case the current and power values are invalid.
         """
         return self._has_current_overflow()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the INA219 to its default configuration."""
         self._configuration_register(1 << self.__RST)
 
-    def is_conversion_ready(self):
+    def is_conversion_ready(self) -> bool:
         """Check if conversion of a new reading has occured."""
         cnvr = self._read_voltage_register() & self.__CNVR
         return (cnvr == self.__CNVR)
 
-    def _handle_current_overflow(self):
+    def _handle_current_overflow(self) -> None:
         if self._auto_gain_enabled:
             while self._has_current_overflow():
                 self._increase_gain()
         else:
             if self._has_current_overflow():
-                raise DeviceRangeError(self.__GAIN_VOLTS[self._gain])
+                raise DeviceRangeError(
+                    self.__GAIN_VOLTS[self._gain] if self._gain else 0.0)
 
-    def _determine_gain(self, max_expected_amps):
+    def _determine_gain(self, max_expected_amps: float) -> int:
         shunt_v = max_expected_amps * self._shunt_ohms
         if shunt_v > self.__GAIN_VOLTS[3]:
             raise ValueError(self.__RNG_ERR_MSG % max_expected_amps)
         gain = min(v for v in self.__GAIN_VOLTS if v > shunt_v)
         return self.__GAIN_VOLTS.index(gain)
 
-    def _increase_gain(self):
+    def _increase_gain(self) -> None:
         self.logger.info(self.__LOG_MSG_3)
         gain = self._read_gain()
         if gain < len(self.__GAIN_VOLTS) - 1:
@@ -270,15 +293,16 @@ class INA219:
             self.logger.info('Device limit reach, gain cannot be increased')
             raise DeviceRangeError(self.__GAIN_VOLTS[gain], True)
 
-    def _configure(self, voltage_range, gain, bus_adc, shunt_adc):
+    def _configure(self, voltage_range: int, gain: int, bus_adc: int,
+                   shunt_adc: int) -> None:
         configuration = (
             voltage_range << self.__BRNG | gain << self.__PG0 |
             bus_adc << self.__BADC1 | shunt_adc << self.__SADC1 |
             self.__CONT_SH_BUS)
         self._configuration_register(configuration)
 
-    def _calibrate(self, bus_volts_max, shunt_volts_max,
-                   max_expected_amps=None):
+    def _calibrate(self, bus_volts_max: int, shunt_volts_max: float,
+                   max_expected_amps: Optional[float] = None) -> None:
         self.logger.info(
             self.__LOG_MSG_2 %
             (bus_volts_max, shunt_volts_max,
@@ -309,7 +333,8 @@ class INA219:
             "calibration: 0x%04x (%d)" % (calibration, calibration))
         self._calibration_register(calibration)
 
-    def _determine_current_lsb(self, max_expected_amps, max_possible_amps):
+    def _determine_current_lsb(self, max_expected_amps: Optional[float],
+                               max_possible_amps: float) -> float:
         if max_expected_amps is not None:
             if max_expected_amps > round(max_possible_amps, 3):
                 raise ValueError(self.__AMP_ERR_MSG %
@@ -327,84 +352,76 @@ class INA219:
             current_lsb = self._min_device_current_lsb
         return current_lsb
 
-    def _configuration_register(self, register_value):
+    def _configuration_register(self, register_value: int) -> None:
         self.logger.debug("configuration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CONFIG, register_value)
 
-    def _read_configuration(self):
+    def _read_configuration(self) -> int:
         return self.__read_register(self.__REG_CONFIG)
 
-    def _calculate_min_current_lsb(self):
+    def _calculate_min_current_lsb(self) -> float:
         return self.__CALIBRATION_FACTOR / \
             (self._shunt_ohms * self.__MAX_CALIBRATION_VALUE)
 
-    def _read_gain(self):
+    def _read_gain(self) -> int:
         configuration = self._read_configuration()
         gain = (configuration & 0x1800) >> self.__PG0
         self.logger.info("gain is currently: %.2fV" % self.__GAIN_VOLTS[gain])
         return gain
 
-    def _configure_gain(self, gain):
+    def _configure_gain(self, gain: int) -> None:
         configuration = self._read_configuration()
         configuration = configuration & 0xE7FF
         self._configuration_register(configuration | (gain << self.__PG0))
         self._gain = gain
         self.logger.info("gain set to: %.2fV" % self.__GAIN_VOLTS[gain])
 
-    def _calibration_register(self, register_value):
+    def _calibration_register(self, register_value: int) -> None:
         self.logger.debug("calibration: 0x%04x" % register_value)
         self.__write_register(self.__REG_CALIBRATION, register_value)
 
-    def _has_current_overflow(self):
+    def _has_current_overflow(self) -> bool:
         ovf = self._read_voltage_register() & self.__OVF
         return (ovf == 1)
 
-    def _voltage_register(self):
+    def _voltage_register(self) -> int:
         register_value = self._read_voltage_register()
         return register_value >> 3
 
-    def _read_voltage_register(self):
+    def _read_voltage_register(self) -> int:
         return self.__read_register(self.__REG_BUSVOLTAGE)
 
-    def _current_register(self):
-        return self.__read_register(self.__REG_CURRENT, True)
+    def _current_register(self) -> int:
+        return self.__read_register(self.__REG_CURRENT, signed=True)
 
-    def _shunt_voltage_register(self):
-        return self.__read_register(self.__REG_SHUNTVOLTAGE, True)
+    def _shunt_voltage_register(self) -> int:
+        return self.__read_register(self.__REG_SHUNTVOLTAGE, signed=True)
 
-    def _power_register(self):
+    def _power_register(self) -> int:
         return self.__read_register(self.__REG_POWER)
 
-    def __validate_voltage_range(self, voltage_range):
+    def __validate_voltage_range(self, voltage_range: int) -> None:
         if voltage_range > len(self.__BUS_RANGE) - 1:
             raise ValueError(self.__VOLT_ERR_MSG)
 
-    def __write_register(self, register, register_value):
-        register_bytes = self.__to_bytes(register_value)
+    def __write_register(self, register: int, value: int) -> None:
         self.logger.debug(
             "write register 0x%02x: 0x%04x 0b%s" %
-            (register, register_value,
-             self.__binary_as_string(register_value)))
-        self._i2c.writeList(register, register_bytes)
+            (register, value, self.__binary_as_string(value)))
+        self._i2c.write(register, struct.pack('>H', value))
 
-    def __read_register(self, register, negative_value_supported=False):
-        if negative_value_supported:
-            register_value = self._i2c.readS16BE(register)
-        else:
-            register_value = self._i2c.readU16BE(register)
+    def __read_register(self, register: int, signed: bool = False) -> int:
+        value = self._i2c.read_word(register, signed)
         self.logger.debug(
             "read register 0x%02x: 0x%04x 0b%s" %
-            (register, register_value,
-             self.__binary_as_string(register_value)))
-        return register_value
+            (register, value, self.__binary_as_string(value)))
+        return value
 
-    def __to_bytes(self, register_value):
-        return [(register_value >> 8) & 0xFF, register_value & 0xFF]
-
-    def __binary_as_string(self, register_value):
+    def __binary_as_string(self, register_value: int) -> str:
         return bin(register_value)[2:].zfill(16)
 
-    def __max_expected_amps_to_string(self, max_expected_amps):
+    def __max_expected_amps_to_string(self, max_expected_amps:
+                                      Optional[float]) -> str:
         if max_expected_amps is None:
             return ''
         else:
@@ -417,7 +434,7 @@ class DeviceRangeError(Exception):
     __DEV_RNG_ERR = ('Current out of range (overflow), '
                      'for gain %.2fV')
 
-    def __init__(self, gain_volts, device_max=False):
+    def __init__(self, gain_volts: float, device_max: bool = False) -> None:
         """Construct a DeviceRangeError."""
         msg = self.__DEV_RNG_ERR % gain_volts
         if device_max:
@@ -425,3 +442,77 @@ class DeviceRangeError(Exception):
         super(DeviceRangeError, self).__init__(msg)
         self.gain_volts = gain_volts
         self.device_limit_reached = device_max
+
+
+class I2cDevice(abc.ABC):
+    """Abstract super class, defining reqiored I2C communication primitives.
+
+    Implementations must ensure that the network byte order ("big endian",
+    MSB first) is followed for read and write operations.
+    """
+
+    @abc.abstractmethod
+    def write(self, register: int, data: bytes) -> None:
+        """Write data bytes to a register address of the I2C device.
+
+        Arguments:
+        register -- The register address at which to write data bytes.
+        data -- data bytes to write
+        """
+        pass
+
+    @abc.abstractmethod
+    def read_word(self, register: int, signed: bool = False) -> int:
+        """Read a (16-bit) word from a register address of the I2C device.
+
+        Arguments:
+        register -- The register address from which to read.
+        signed -- Whether or not to treat the result as a 2's complement
+                  signed number.
+        Returns:
+        (int) -- A 16 bit integer (MSB first).
+        """
+        pass
+
+
+class SmbusI2cDevice(I2cDevice):
+
+    def __init__(self, interface: int, address: int) -> None:
+        from smbus import SMBus  # type: ignore
+        super().__init__()
+        self._i2c = SMBus(interface)
+        self._addr = address
+
+    def write(self, register: int, data: bytes) -> None:
+        self._i2c.write_i2c_block_data(self._addr, register,
+                                       [int(b) for b in data])
+
+    def read_word(self, register: int, signed: bool = False) -> int:
+        data = cast(List[int],
+                    self._i2c.read_i2c_block_data(self._addr, register, 2))
+        return cast(int,
+                    struct.unpack('>h' if signed else '>H', bytes(data))[0])
+
+
+class Smbus2I2cDevice(SmbusI2cDevice):
+
+    def __init__(self, interface: int, address: int) -> None:
+        from smbus2 import SMBus  # type: ignore
+        self._i2c = SMBus(interface)
+        self._addr = address
+
+
+class AdafruitI2cDevice(I2cDevice):
+
+    def __init__(self, interface: int, address: int) -> None:
+        import Adafruit_GPIO.I2C as I2C  # type: ignore
+        super().__init__()
+        self._i2c = I2C.get_i2c_device(address=address, busnum=interface)
+
+    def write(self, register: int, data: bytes) -> None:
+        self._i2c.writeList(register, data)
+
+    def read_word(self, register: int, signed: bool = False) -> int:
+        if signed:
+            return cast(int, self._i2c.readS16BE(register))
+        return cast(int, self._i2c.readU16BE(register))

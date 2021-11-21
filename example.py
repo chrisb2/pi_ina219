@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 
 import logging
-from ina219 import INA219
+from ina219 import INA219, SmbusI2cDevice, Smbus2I2cDevice, AdafruitI2cDevice
 
 SHUNT_OHMS = 0.1
 MAX_EXPECTED_AMPS = 0.2
 
 
 def read():
-    ina = INA219(SHUNT_OHMS, MAX_EXPECTED_AMPS, log_level=logging.INFO)
+
+    i2c_addr = INA219.i2c_addr()
+    i2c_addr = INA219.I2C_ADDR_DEFAULT
+
+    i2c_device = SmbusI2cDevice(interface=1, address=i2c_addr)
+    i2c_device = Smbus2I2cDevice(interface=1, address=i2c_addr)
+    i2c_device = AdafruitI2cDevice(interface=1, address=i2c_addr)
+
+    ina = INA219(i2c_device, SHUNT_OHMS, MAX_EXPECTED_AMPS,
+                 log_level=logging.INFO)
     ina.configure(ina.RANGE_16V, ina.GAIN_AUTO)
 
     print("Bus Voltage    : %.3f V" % ina.voltage())

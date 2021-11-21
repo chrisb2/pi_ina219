@@ -1,2 +1,1 @@
-Adafruit_GPIO==1.0.1
 mock==2.0.0
