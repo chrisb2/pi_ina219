@@ -7,7 +7,7 @@ from ina219 import DeviceRangeError
 
 
 logger = logging.getLogger()
-logger.level = logging.DEBUG
+logger.level = logging.ERROR
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
