@@ -9,6 +9,7 @@ MAX_EXPECTED_AMPS = 0.2
 
 def read():
 
+    i2c_addr = INA219.i2c_addr()
     i2c_addr = INA219.I2C_ADDR_DEFAULT
 
     i2c_device = SmbusI2cDevice(interface=1, address=i2c_addr)

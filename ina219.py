@@ -37,6 +37,22 @@ class INA219:
 
     I2C_ADDR_DEFAULT = 0x40
 
+    class I2cAddrAx(IntEnum):
+        """Configuration values for INA219 pins A0 and A1."""
+        GND = 0b00
+        VSP = 0b01
+        SDA = 0b10
+        SCL = 0b11
+
+    @staticmethod
+    def i2c_addr(a0: I2cAddrAx = I2cAddrAx.GND,
+                 a1: I2cAddrAx = I2cAddrAx.GND) -> int:
+        """Create an I2C address from INA219 pins A0 and A1 configurations.
+
+        See "8.5.5.1 Serial Bus Address" from the datasheet.
+        """
+        return 0x40 + (a1.value << 2) + a0.value
+
     __REG_CONFIG = 0x00
     __REG_SHUNTVOLTAGE = 0x01
     __REG_BUSVOLTAGE = 0x02
