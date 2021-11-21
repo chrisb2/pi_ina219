@@ -175,13 +175,13 @@ class TestConfiguration(unittest.TestCase):
             ina.configure(ina.RANGE_32V, ina.GAIN_1_40MV)
 
     def test_sleep(self):
-        self.ina._i2c.read_word_data = Mock(return_value=0xf)
+        self.ina._i2c.read_word_data = Mock(return_value=0x0f00)
         self.ina.sleep()
         self.ina._i2c.write_i2c_block_data.assert_called_with(
             0x40, 0x00, [0x00, 0x08])
 
     def test_wake(self):
-        self.ina._i2c.read_word_data = Mock(return_value=0x8)
+        self.ina._i2c.read_word_data = Mock(return_value=0x0800)
         self.ina.wake()
         self.ina._i2c.write_i2c_block_data.assert_called_with(
             0x40, 0x00, [0x00, 0xf])
