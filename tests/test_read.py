@@ -111,5 +111,5 @@ class TestRead(unittest.TestCase):
 
     def test_new_read_not_available(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
-        self.ina._i2c.read_word_data = Mock(return_value=0x8)
+        self.ina._i2c.read_word_data = Mock(return_value=0x0800)
         self.assertFalse(self.ina.is_conversion_ready())
