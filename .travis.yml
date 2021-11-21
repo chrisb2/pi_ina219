@@ -1,7 +1,5 @@
 language: python
 python:
-  - "2.7"
-  - "3.5"
   - "3.6"
   - "3.7"
   - "3.8"
@@ -14,7 +12,7 @@ install:
 before_script:
    flake8 .
 # command to run tests
-script: 
+script:
   - coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
   - coverage xml
 after_success:
