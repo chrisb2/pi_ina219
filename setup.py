@@ -14,9 +14,6 @@ classifiers = ['Development Status :: 5 - Production/Stable',
                'Programming Language :: Python :: 3.9',
                'Topic :: System :: Hardware :: Hardware Drivers']
 
-# Define required packages.
-requires = ['Adafruit_GPIO', 'mock']
-
 
 def read_long_description():
     try:
@@ -36,6 +33,6 @@ setup(name='pi-ina219',
       url='https://github.com/chrisb2/pi_ina219/',
       classifiers=classifiers,
       keywords='ina219 raspberrypi',
-      install_requires=requires,
+      install_requires=[],
       test_suite='tests',
       py_modules=['ina219'])
