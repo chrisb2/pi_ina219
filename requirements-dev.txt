@@ -1,0 +1,5 @@
+-r ./requirements.txt
+-r ./tests/requirements.txt
+
+flake8
+mypy

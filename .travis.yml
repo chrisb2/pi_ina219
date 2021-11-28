@@ -6,9 +6,7 @@ python:
   - "3.9"
 # command to install dependencies
 install:
-  - pip install flake8
-  - pip install mypy
-  - pip install -r tests/requirements.txt
+  - pip install -r requirements-dev.txt
 # check PEP8 coding standard with flake8 and typing with mypy
 before_script:
   - flake8 .

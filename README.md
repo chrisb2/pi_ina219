@@ -291,12 +291,15 @@ Detailed logging of device register operations can be enabled with:
     ina = INA219(SHUNT_OHMS, log_level=logging.DEBUG)
 ```
 
-## Testing
+## Development
 
-Install test dependencies first _(recommended to use virtual environments)_:
+Install development dependencies first _(recommended to use virtual environments)_. This includes
+package dependencies, testing dependencies and static analysis dependencies.
 ```shell
-pip3 install -r tests/requirements.txt
+pip3 install -r requirements-dev.txt
 ```
+
+### Testing
 
 ```shell
 python3 -m unittest discover -s tests -p 'test_*.py'
@@ -316,7 +319,13 @@ coverage report -m
 coverage xml
 ```
 
-## Coding Standard
+### Coding Standard
 
 This library adheres to the _PEP8_ standard and follows the _idiomatic_
 style described in the book _Writing Idiomatic Python_ by _Jeff Knupp_.
+
+To perform local linting and type checks, run:
+```sh
+flake8 .
+mypy -p ina219 --strict
+```
