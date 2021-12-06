@@ -1,5 +1,6 @@
 *.pyc
 .coverage
+coverage.xml
 build
 dist
 pi_ina219.egg-info

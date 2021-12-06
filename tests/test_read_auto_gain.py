@@ -43,5 +43,5 @@ class TestReadAutoGain(unittest.TestCase):
         self.ina._read_voltage_register = Mock(return_value=0xfa1)
         self.ina._read_configuration = Mock(return_value=0x199f)
 
-        with self.assertRaisesRegexp(DeviceRangeError, self.GAIN_RANGE_MSG):
+        with self.assertRaisesRegex(DeviceRangeError, self.GAIN_RANGE_MSG):
             self.ina.current()

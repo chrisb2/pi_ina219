@@ -27,12 +27,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 codecov
-        pip install -r tests/requirements.txt
+        pip install -r requirements-dev.txt
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 .
+    - name: Typecheck with mypy
+      run: |
+        mypy -p ina219 --strict
     - name: Test with codecov
       run: |
         coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
