@@ -101,7 +101,7 @@ class TestRead(unittest.TestCase):
     def test_current_overflow_error(self):
         self.ina.configure(self.ina.RANGE_16V, self.ina.GAIN_2_80MV)
         self.ina._i2c.readU16BE = Mock(return_value=0xfa1)
-        with self.assertRaisesRegexp(DeviceRangeError, self.GAIN_RANGE_MSG):
+        with self.assertRaisesRegex(DeviceRangeError, self.GAIN_RANGE_MSG):
             self.ina.current()
 
     def test_new_read_available(self):

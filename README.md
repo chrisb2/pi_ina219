@@ -31,14 +31,14 @@ This library and its dependency
 can be installed from PyPI by executing:
 
 ```shell
-sudo pip3 install pi-ina219
+pip3 install pi-ina219
 ```
 
 To upgrade from a previous version installed direct from Github execute:
 
 ```shell
-sudo pip3 uninstall pi-ina219
-sudo pip3 install pi-ina219
+pip3 uninstall pi-ina219
+pip3 install pi-ina219
 ```
 
 The Adafruit library supports the I2C protocol on all versions of the
@@ -293,10 +293,10 @@ Detailed logging of device register operations can be enabled with:
 
 ## Testing
 
-Install the library as described above, this will install all the
-dependencies required for the unit tests, as well as the library
-itself. Clone the library source from Github then execute the test suite
-from the top level directory with:
+Install test dependencies first _(recommended to use virtual environments)_:
+```shell
+pip3 install -r tests/requirements.txt
+```
 
 ```shell
 python3 -m unittest discover -s tests -p 'test_*.py'
@@ -313,6 +313,7 @@ Code coverage metrics may be generated and viewed with:
 ```shell
 coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
 coverage report -m
+coverage xml
 ```
 
 ## Coding Standard
