@@ -31,7 +31,7 @@ def read_long_description():
     try:
         import pypandoc
         return pypandoc.convert_file('README.md', 'rst')
-    except(IOError, ImportError):
+    except (IOError, ImportError):
         return ""
 
 
