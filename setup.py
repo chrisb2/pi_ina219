@@ -30,13 +30,13 @@ requires = ['Adafruit_GPIO', 'mock']
 def read_long_description():
     try:
         import pypandoc
-        return pypandoc.convert('README.md', 'rst')
-    except(IOError, ImportError):
+        return pypandoc.convert_file('README.md', 'rst')
+    except (IOError, ImportError):
         return ""
 
 
 setup(name='pi-ina219',
-      version='1.4.0',
+      version='1.4.1',
       author='Chris Borrill',
       author_email='chris.borrill@gmail.com',
       description=DESC,
