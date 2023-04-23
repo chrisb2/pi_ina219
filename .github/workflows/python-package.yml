@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
 
     steps:
     - uses: actions/checkout@v2
@@ -37,8 +37,3 @@ jobs:
       run: |
         coverage run --branch --source=ina219 -m unittest discover -s tests -p 'test_*.py'
         coverage xml
-    - name: Upload coverage reports to Codecov
-      run: |
-        codecov(token = "${{ super_secret }}")
-      env: # Or as an environment variable
-        super_secret: ${{ secrets.CODECOV_TOKEN }}
