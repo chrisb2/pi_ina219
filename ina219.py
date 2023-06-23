@@ -33,6 +33,7 @@ class INA219:
     ADC_128SAMP = 15  # 128 samples at 12-bit, conversion time 68.10ms.
 
     __ADDRESS = 0x40
+    __I2C_BUS_NUM = None
 
     __REG_CONFIG = 0x00
     __REG_SHUNTVOLTAGE = 0x01
@@ -91,7 +92,7 @@ class INA219:
     __CURRENT_LSB_FACTOR = 32800
 
     def __init__(self, shunt_ohms, max_expected_amps=None,
-                 busnum=None, address=__ADDRESS,
+                 i2c_bus_num=__I2C_BUS_NUM, address=__ADDRESS,
                  log_level=logging.ERROR):
         """Construct the class.
 
@@ -113,7 +114,7 @@ class INA219:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(log_level)
 
-        self._i2c = I2C.get_i2c_device(address=address, busnum=busnum)
+        self._i2c = I2C.get_i2c_device(address=address, busnum=i2c_bus_num)
         self._shunt_ohms = shunt_ohms
         self._max_expected_amps = max_expected_amps
         self._min_device_current_lsb = self._calculate_min_current_lsb()
